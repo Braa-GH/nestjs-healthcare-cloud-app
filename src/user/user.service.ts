@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -6,16 +6,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuid } from "uuid";
 import { UserIdentifiers } from 'src/common/types';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(User) private userRepo: Repository<User>){}
 
-    async findOne(userIdentifiers: UserIdentifiers){
-        const user = await this.userRepo.findOne({
+    findOne(userIdentifiers: UserIdentifiers){
+        return this.userRepo.findOne({
             where: userIdentifiers
         });
-        return user;
     }
 
     async findAll(limit: number = 100, page: number = 1){
@@ -36,17 +36,33 @@ export class UserService {
             return await this.create(userDto);
         }
         const user = this.userRepo.create({ ...userDto, id });
-        const row = await this.userRepo.save(user) as any;
+        const row = await this.userRepo.save(user);
         delete row.password;
         return row;
     }
 
-    update(userId: string, userDto: UpdateUserDto){
+    update(userId: string, userDto: UpdateUserDto | any){
         return this.userRepo.update({id: userId}, userDto);
     }
 
     delete(userId: string){
         return this.userRepo.delete({id: userId});
+    }
+
+    async validatePassword(userId: string, password: string){
+        const user = await this.findOne({id: userId});
+        const compare = await bcrypt.compare(password, user.password);
+        return compare ? true : false;
+    }
+
+    async changePassword(userId: string, oldPass: string, newPass: string){
+        const compare = await this.validatePassword(userId, oldPass);
+        if(!compare){
+            throw new BadRequestException("Invalid Password!");
+        }
+        const salt = bcrypt.genSaltSync();
+        const encryptedPassword = bcrypt.hashSync(newPass, salt);
+        return await this.userRepo.update({id: userId}, {password: encryptedPassword});
     }
 
 }

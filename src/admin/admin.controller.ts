@@ -1,4 +1,4 @@
-import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, Post } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
@@ -34,7 +34,10 @@ export class AdminController {
     @ApiOperation({summary: "Find Specific Admin By ID."})
     @ApiParam({name: "adminId", example: "ad-012025-42c9c3", required: true, allowEmptyValue: false})
     async findOne(@Param('adminId', ValidateAdminIdPipe) adminId: string){
-        return this.adminService.findOne({id: adminId});
+        const admin = await this.adminService.findOne({id: adminId});
+        if(!admin)
+            throw new NotFoundException();
+        return admin;
     }
 
     @Delete(":adminId")

@@ -3,6 +3,8 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 @Injectable()
 export class ValidatePatientIdPipe implements PipeTransform {
   transform(patientId: string, metadata: ArgumentMetadata) {
+    if(!patientId) throw new BadRequestException("Patient ID Can Not Be Empty!");
+
     const parts = patientId.split("-");
     if(patientId.length !== 16 ||
        parts.length !== 3 ||

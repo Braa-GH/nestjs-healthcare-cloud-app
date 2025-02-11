@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Timestamp, BeforeInsert, AfterLoad } from "typeorm";
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Timestamp, BeforeInsert } from "typeorm";
 import * as bcrypt from "bcrypt";
 
 @Entity()
@@ -41,11 +41,6 @@ export class User {
         const salt = bcrypt.genSaltSync();
         const encryptedPassword = bcrypt.hashSync(this.password, salt);
         this.password = encryptedPassword;
-    }
-
-    @AfterLoad()
-    removeFields(){
-        // delete this.profileImg;
     }
 
 }

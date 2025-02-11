@@ -1,5 +1,7 @@
 import { Routes } from "@nestjs/core";
 import { AdminModule } from "src/admin/admin.module";
+import { AppModule } from "src/app.module";
+import { AuthModule } from "src/auth/auth.module";
 import { DoctorModule } from "src/doctor/doctor.module";
 import { PatientModule } from "src/patient/patient.module";
 import { SpecialtyModule } from "src/specialty/specialty.module";
@@ -28,7 +30,15 @@ export const routesConfig: Routes = [
             {
                 path: "/",
                 module: DoctorModule
+            },
+            {
+                path: "/",
+                module: AuthModule
             }
         ]
+    },
+    {
+        "path": "/",
+        module: AppModule
     }
 ]

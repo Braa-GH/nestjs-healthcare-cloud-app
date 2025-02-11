@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, UploadedFile, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery, ApiParam } from "@nestjs/swagger";
@@ -10,6 +10,10 @@ import { PROFILE_IMG_PATH } from 'src/common/paths';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
 import { ProfileImgValidator } from 'src/common/file-validators/profile-img.validator';
+import { unlinkSync } from 'fs';
+import { join } from 'path';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller("user")
 @ApiTags("User Endpoints")
@@ -51,13 +55,21 @@ export class UserController {
         return this.userService.create(userDto);
     }
 
+    @Patch("change-password")
+    @UseGuards(JwtAuthGuard)
+    changePassword(@Body(ValidationPipe) passwordDto: ChangePasswordDto, @Req() req){
+        const userId = req.user.userId;
+        const { oldPassword, newPassword } = passwordDto;
+        return this.userService.changePassword(userId, oldPassword, newPassword);
+    }
+
     @Patch(":userId")
     @HttpCode(HttpStatus.OK)
     @ApiOperation({summary: "Update a specific user using ID"})
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     updateUser(
         @Param("userId", ValidateUserIdPipe) userId: string,
-        @Body(BodyNotEmptyPipe, ValidationPipe) userDto: UpdateUserDto
+        @Body(BodyNotEmptyPipe, new ValidationPipe({whitelist: true})) userDto: UpdateUserDto
     ){
         return this.userService.update(userId, userDto);
     }
@@ -81,15 +93,21 @@ export class UserController {
             destination: PROFILE_IMG_PATH
         })
     }))
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({summary: "upload profile image for a user!"})
     async uploadProfileImg(
+        @Req() req,
         @UploadedFile(
             new ParseFilePipe({
                 validators: [new ProfileImgValidator({})]
         })) image: Express.Multer.File
     ){
-        // get user from request
-        // store image name in user's record in db
-        // if exist unlink and update
+        const { userId } = req.user;
+        const user = await this.findOne(userId);
+        if(user.profileImg){
+            const path = join(PROFILE_IMG_PATH, user.profileImg);
+            unlinkSync(path);
+        }
+        return await this.userService.update(userId, {profileImg: image.filename});
     }
 }

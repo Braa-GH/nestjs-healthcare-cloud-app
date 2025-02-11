@@ -1,3 +1,4 @@
+import { AppController } from './app.controller';
 import { SpecialtyModule } from './specialty/specialty.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { AdminModule } from './admin/admin.module';
@@ -13,9 +14,11 @@ import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
 import { RouterModule } from '@nestjs/core';
 import { routesConfig } from './config/routes-config';
 import { PatientModule } from './patient/patient.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     SpecialtyModule,
     DoctorModule,
     AdminModule,
@@ -41,7 +44,7 @@ import { PatientModule } from './patient/patient.module';
     }),
     RouterModule.register(routesConfig),
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}

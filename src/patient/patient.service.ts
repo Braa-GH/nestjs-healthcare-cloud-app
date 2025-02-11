@@ -25,10 +25,10 @@ export class PatientService {
 
     findOne({id, userId}: PatientIdentifiers){
         const user = new User()
-        user.id = userId as any;
+        user.id = userId;
         return this.patientRepo.findOne({
             where: [{id},{user}],
-            // relations: ["user"]
+            // relations: ["user"],
             loadRelationIds: true
         });
     }

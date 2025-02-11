@@ -3,9 +3,11 @@ import { validate } from "uuid";
 
 @Injectable()
 export class ValidateUserIdPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    if(!validate(value))
+  transform(userId: any, metadata: ArgumentMetadata) {
+    if(!userId) throw new BadRequestException("User ID Can Not Be Empty!");
+
+    if(!validate(userId))
       throw new BadRequestException("Invalid User Id!");
-    return value;
+    return userId;
   }
 }

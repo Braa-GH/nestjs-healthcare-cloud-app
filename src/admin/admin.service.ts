@@ -16,7 +16,7 @@ export class AdminService {
 
     findOne({id, userId}: AdminIdentifiers){
         const user = new User();
-        user.id = userId as any;
+        user.id = userId;
         return this.adminRepo.findOne({
             where: [{id}, {user}],
             loadRelationIds: true

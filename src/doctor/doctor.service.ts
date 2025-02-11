@@ -14,7 +14,7 @@ export class DoctorService {
 
     findOne({id, userId}: DoctorIdentifiers){
         const user = new User();
-        user.id = userId as any;
+        user.id = userId;
         return this.doctorRepo.findOne({
             where: [{id, user}],
             loadRelationIds: true

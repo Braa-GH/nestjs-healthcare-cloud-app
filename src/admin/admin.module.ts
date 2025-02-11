@@ -9,5 +9,6 @@ import { UserModule } from 'src/user/user.module';
     imports: [TypeOrmModule.forFeature([Admin]), UserModule],
     controllers: [AdminController],
     providers: [AdminService],
+    exports: [AdminService]
 })
 export class AdminModule {}
