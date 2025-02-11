@@ -1,6 +1,8 @@
 import { Routes } from "@nestjs/core";
 import { AdminModule } from "src/admin/admin.module";
+import { DoctorModule } from "src/doctor/doctor.module";
 import { PatientModule } from "src/patient/patient.module";
+import { SpecialtyModule } from "src/specialty/specialty.module";
 import { UserModule } from "src/user/user.module";
 
 export const routesConfig: Routes = [
@@ -18,6 +20,10 @@ export const routesConfig: Routes = [
             {
                 path: "/",
                 module: AdminModule
+            },
+            {
+                path: "/",
+                module: SpecialtyModule
             }
         ]
     }

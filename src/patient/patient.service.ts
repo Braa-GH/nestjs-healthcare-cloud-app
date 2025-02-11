@@ -11,15 +11,20 @@ export class PatientService {
     constructor(@InjectRepository(Patient) private patientRepo: Repository<Patient>){}
 
     async create(userId: string){
+        //generate ID
         const date = `${new Date().getUTCMonth()+1}${new Date().getUTCFullYear()}`;
         const patientId = `pt-${date.length == 5 ? "0":""}${date}-${randomBytes(3).toString("hex")}`;
+        //if generated Id is already exist in db, try again..
+        const idExist = await this.findOne({id: patientId});
+        if(idExist)
+            return await this.create(userId);
         const patient = this.patientRepo.create({id: patientId, user: userId});
         const saved = await this.patientRepo.save(patient);
         return saved;
     }
 
     findOne({id, userId}: PatientIdentifiers){
-        const user = new User();
+        const user = new User()
         user.id = userId as any;
         return this.patientRepo.findOne({
             where: [{id},{user}],

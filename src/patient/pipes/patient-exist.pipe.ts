@@ -6,7 +6,7 @@ export class PatientExistPipe implements PipeTransform {
 
   constructor(private patientService: PatientService){}
 
-  async transform(patientId: any, metadata: ArgumentMetadata) {
+  async transform(patientId: string, metadata: ArgumentMetadata) {
     const patient = await this.patientService.findOne({id: patientId});
     if(!patient)
       throw new NotFoundException("Patient is not exist!");

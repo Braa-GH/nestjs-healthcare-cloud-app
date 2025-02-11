@@ -8,7 +8,7 @@ export class Specialty {
     @PrimaryColumn()
     id: string;
 
-    @Column()
+    @Column({unique: true})
     name: string;
 
     @CreateDateColumn()

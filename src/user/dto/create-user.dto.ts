@@ -1,6 +1,6 @@
 import { IsDateString, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from "class-validator";
 import { Sex } from "src/common/enums";
-import { ApiProperty,ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateUserDto {
     @IsNotEmpty() @IsString()

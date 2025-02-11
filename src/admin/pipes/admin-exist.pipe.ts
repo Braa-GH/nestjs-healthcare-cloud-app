@@ -5,7 +5,7 @@ import { AdminService } from '../admin.service';
 export class AdminExistPipe implements PipeTransform {
   constructor(private adminService: AdminService){}
 
-  async transform(adminId: any, metadata: ArgumentMetadata) {
+  async transform(adminId: string, metadata: ArgumentMetadata) {
     const admin = await this.adminService.findOne({id: adminId});
     if(!admin)
       throw new NotFoundException("Admin is not exist!")

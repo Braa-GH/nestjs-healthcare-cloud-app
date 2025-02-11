@@ -24,8 +24,13 @@ export class AdminService {
     }
 
     async create(userId: string){
+        //generate adminId
         const date = `${new Date().getUTCMonth()+1}${new Date().getUTCFullYear()}`;
         const adminId = `ad-${date.length == 5 ? "0":""}${date}-${randomBytes(3).toString("hex")}`;
+        //if generated Id is already exist in db, try again..
+        const idExist = await this.findOne({id: adminId});
+        if(idExist)
+            return await this.create(userId);
         const admin = this.adminRepo.create({id: adminId, user: userId});
         const saved = await this.adminRepo.save(admin);
         return saved;

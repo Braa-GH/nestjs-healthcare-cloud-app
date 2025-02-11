@@ -15,5 +15,5 @@ export class Patient {
 
     @OneToOne(() => User, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     @JoinColumn()
-    user: any;
+    user: User | any;
 }
