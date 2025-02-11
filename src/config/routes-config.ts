@@ -24,6 +24,10 @@ export const routesConfig: Routes = [
             {
                 path: "/",
                 module: SpecialtyModule
+            },
+            {
+                path: "/",
+                module: DoctorModule
             }
         ]
     }

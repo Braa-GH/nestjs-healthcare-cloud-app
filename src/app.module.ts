@@ -1,4 +1,5 @@
 import { SpecialtyModule } from './specialty/specialty.module';
+import { DoctorModule } from './doctor/doctor.module';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { PatientModule } from './patient/patient.module';
 @Module({
   imports: [
     SpecialtyModule,
+    DoctorModule,
     AdminModule,
     UserModule,
     PatientModule,

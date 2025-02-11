@@ -13,6 +13,10 @@ export type PatientIdentifiers = {
     userId?: string
 }
 
+export type DoctorIdentifiers = {
+    id?: string;
+    userId?: string
+}
 export type SpecialtyIdentifiers = {
     id?: string,
     name?: string
