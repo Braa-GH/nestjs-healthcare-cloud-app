@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from './patient.entity';
 import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from "@nestjs/mongoose";
-import { PatientApplication, PatientApplicationSchema } from './patient-application.schema';
+import { PatientApplication, PatientApplicationSchema } from '../patient-application/patient-application.schema';
 import { ProvidersModule } from 'src/common/dependencies-provider/providers.module';
 
 @Module({

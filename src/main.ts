@@ -9,7 +9,7 @@ async function bootstrap() {
         },
     });
 
-    app.setGlobalPrefix("/api",{exclude:["/"]})
+    app.setGlobalPrefix("/api",{exclude:["/profile"]})
 
     const PORT = await app.get(ConfigService).get("port");
     // Swagger documentation

@@ -28,6 +28,9 @@ export class User {
     sex: string;
 
     @Column({nullable: true})
+    location?: string;
+
+    @Column({nullable: true})
     profileImg?: string;
 
     @CreateDateColumn()

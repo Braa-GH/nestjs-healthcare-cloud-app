@@ -123,7 +123,11 @@ export class UserController {
         const result = await this.findOne(userId);
         if(result.profileImg){
             const path = join(PROFILE_IMG_PATH, result.profileImg);
-            unlinkSync(path);
+            try{
+                unlinkSync(path);
+            }catch(err){
+                console.log("err")
+            }
         }
         return await this.userService.update(userId, {profileImg: image.filename});
     }

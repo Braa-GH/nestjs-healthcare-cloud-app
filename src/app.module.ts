@@ -1,3 +1,4 @@
+import { PatientApplicationModule } from './patient-application/patient-application.module';
 import { DocumentModule } from './document/document.module';
 import { AppController } from './app.controller';
 import { SpecialtyModule } from './specialty/specialty.module';
@@ -20,9 +21,12 @@ import { Admin } from './admin/admin.entity';
 import { Doctor } from './doctor/doctor.entity';
 import { Patient } from './patient/patient.entity';
 import { ProvidersModule } from './common/dependencies-provider/providers.module';
+import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
 
 @Module({
   imports: [
+    DoctorApplicationModule,
+    PatientApplicationModule,
     ProvidersModule,
     DocumentModule,
     AuthModule,

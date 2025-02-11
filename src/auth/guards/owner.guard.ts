@@ -12,7 +12,6 @@ export class OwnerGuard implements CanActivate {
     const request = ctx.getRequest();
     const user = request.user;
     const {userId, adminId, doctorId, patientId} = request.params;
-    console.log("params:",request.params);
     
     if(
       (userId && user.userId == userId) ||

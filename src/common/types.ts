@@ -21,3 +21,13 @@ export type SpecialtyIdentifiers = {
     id?: string,
     name?: string
 }
+
+export type PatientAppIdentifiers = {
+    _id?: string,
+    userId?: string
+}
+
+export type DoctorAppIdentifiers = {
+    _id?: string,
+    userId?: string
+}

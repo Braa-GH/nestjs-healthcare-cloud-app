@@ -63,4 +63,5 @@ export class PatientController {
     deletePatient(@Param("patientId", ValidatePatientIdPipe, PatientExistPipe) patientId: string){
         return this.patientService.delete(patientId);
     }
+
 }

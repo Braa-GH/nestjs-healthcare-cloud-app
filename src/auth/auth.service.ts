@@ -21,7 +21,6 @@ export class AuthService {
         private configService: ConfigService,
         private jwtService: JwtService
     ){}
-
     
     async userLogin({email,password}: UserLoginDto){
         const user = await this.userService.findOne({email});

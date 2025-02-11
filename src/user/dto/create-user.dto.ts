@@ -31,4 +31,8 @@ export class CreateUserDto {
     @IsOptional() @IsPhoneNumber()
     @ApiPropertyOptional({example: "+972598848308"})
     readonly phone?: string;
+
+    @IsOptional() @IsString()
+    @ApiPropertyOptional({example: "Palestine, Gaza Strip, Gaza city"})
+    readonly location?: string;
 }

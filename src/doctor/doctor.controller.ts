@@ -12,11 +12,16 @@ import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums';
 import { OwnerGuard } from 'src/auth/guards/owner.guard';
+import { DoctorApplicationService } from 'src/doctor-application/doctor-application.service';
 
 @Controller("doctor")
 @ApiTags("Doctor Endpoints")
 export class DoctorController {
-    constructor(private doctorService: DoctorService, private specialtyService: SpecialtyService){}
+    constructor(
+        private doctorService: DoctorService,
+        private specialtyService: SpecialtyService,
+        private doctorAppService: DoctorApplicationService
+    ){}
 
     @Post(":userId")
     @Auth(null, Roles.Admin)
@@ -66,7 +71,8 @@ export class DoctorController {
         const doctor = await this.doctorService.findOne({id: doctorId});
         if(!doctor)
             throw new NotFoundException("Doctor is not exist!");
-        return doctor;
+        const { documents, degree } = await this.doctorAppService.findOne({_id: doctor.applicationId});
+        return {...doctor, documents, degree};
     }
 
     @Patch(":doctorId")

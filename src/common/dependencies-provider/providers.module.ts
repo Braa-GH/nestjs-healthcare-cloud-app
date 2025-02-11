@@ -19,6 +19,12 @@ import { Document, documentSchema } from "src/document/document.schema";
 import { SpecialtyModule } from "src/specialty/specialty.module";
 import { SpecialtyService } from "src/specialty/specialty.service";
 import { Specialty } from "src/specialty/specialty.entity";
+import { PatientApplicationModule } from "src/patient-application/patient-application.module";
+import { PatientApplicationService } from "src/patient-application/patient-application.service";
+import { PatientApplication } from "src/patient-application/patient-application.schema";
+import { DoctorApplicationModule } from "src/doctor-application/doctor-application.module";
+import { DoctorApplication } from "src/doctor-application/doctor-application.schema";
+import { DoctorApplicationService } from "src/doctor-application/doctor-application.service";
 
 @Module({
   imports: [
@@ -27,11 +33,23 @@ import { Specialty } from "src/specialty/specialty.entity";
         forwardRef(() => DoctorModule),
         forwardRef(() => PatientModule),
         forwardRef(() => DocumentModule),
+        forwardRef(() => PatientApplicationModule),
+        forwardRef(() => DoctorApplicationModule),
         SpecialtyModule,
         TypeOrmModule.forFeature([Admin, Doctor, Patient, User, Document, Specialty]),
-        MongooseModule.forFeature([{name: Document.name, schema: documentSchema}])
+        MongooseModule.forFeature([
+          {name: Document.name, schema: documentSchema},
+          {name: PatientApplication.name, schema: PatientApplication},
+          {name: DoctorApplication.name, schema: DoctorApplication},
+        ])
     ],
-  providers: [AdminService, DoctorService, PatientService, UserService, DocumentService, SpecialtyService],
-  exports: [AdminService, DoctorService, PatientService, UserService, DocumentService, SpecialtyService],
+  providers: [
+    AdminService, DoctorService, PatientService, UserService,
+    DocumentService, SpecialtyService, PatientApplicationService, DoctorApplicationService
+  ],
+  exports: [
+    AdminService, DoctorService, PatientService, UserService,
+    DocumentService, SpecialtyService, PatientApplicationService, DoctorApplicationService
+  ],
 })
 export class ProvidersModule {}

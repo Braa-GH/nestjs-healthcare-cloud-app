@@ -40,9 +40,9 @@ export class DoctorService {
             return await this.create(userID, doctorDto);
         }
         const doctor = this.doctorRepo.create({
-            id: doctorId, user: userID, specialty: doctorDto.specialtyId
+            id: doctorId, user: userID, ...doctorDto
         });
-        return await this.doctorRepo.save(doctor);
+        return await this.doctorRepo.upsert(doctor, {conflictPaths: {user: true}});
     }
 
     update(doctorId: string, {specialtyId}: UpdateDoctorDto){

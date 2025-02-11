@@ -10,7 +10,7 @@ import { User } from 'src/user/user.entity';
 export class PatientService {
     constructor(@InjectRepository(Patient) private patientRepo: Repository<Patient>){}
 
-    async create(userId: string){
+    async create(userId: string, applicationId?: string){
         //generate ID
         const date = `${new Date().getUTCMonth()+1}${new Date().getUTCFullYear()}`;
         const patientId = `pt-${date.length == 5 ? "0":""}${date}-${randomBytes(3).toString("hex")}`;
@@ -18,9 +18,9 @@ export class PatientService {
         const idExist = await this.findOne({id: patientId});
         if(idExist)
             return await this.create(userId);
-        const patient = this.patientRepo.create({id: patientId, user: userId});
-        const saved = await this.patientRepo.save(patient);
-        return saved;
+        const patient = this.patientRepo.create({id: patientId, user: userId, applicationId});
+        const saved = await this.patientRepo.upsert(patient, {conflictPaths: {user: true},skipUpdateIfNoValuesChanged: true})
+        return saved.raw;
     }
 
     findOne({id, userId}: PatientIdentifiers){
@@ -46,4 +46,6 @@ export class PatientService {
     delete(patientId: string){
         return this.patientRepo.delete({id: patientId});
     }
+
+    
 }
