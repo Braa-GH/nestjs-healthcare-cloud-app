@@ -4,5 +4,5 @@ import { ApiProperty } from "@nestjs/swagger";
 export class UpdateSpecialtyDto {
   @IsString()
   @ApiProperty({example: "Ophthalmologist"})
-  newName: string;
+  readonly newName: string;
 }

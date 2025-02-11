@@ -31,3 +31,15 @@ export type DoctorAppIdentifiers = {
     _id?: string,
     userId?: string
 }
+
+export type AppointmentIdentifiers = {
+    _id?: string,
+    patientId?: string,
+    doctorId?: string
+}
+
+export type AppointmentsIdentifiers = {
+    patientId?: string,
+    doctorId?: string,
+    ignoreFollowups?: boolean
+}

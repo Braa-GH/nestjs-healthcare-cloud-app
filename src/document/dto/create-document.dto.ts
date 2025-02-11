@@ -4,9 +4,9 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 export class CreateDocumentDto {
     @IsNotEmpty() @IsString()
     @ApiProperty({example: "CT Scan"})
-    title: string;
+    readonly title: string;
 
     @IsOptional() @IsString()
     @ApiPropertyOptional({example: "photo of CT Scan, scanned at 2020"})
-    description: string;
+    readonly description: string;
 }

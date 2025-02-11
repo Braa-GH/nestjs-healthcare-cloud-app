@@ -14,3 +14,10 @@ export enum Roles {
     User = "User",
     Owner = "Owner"
 }
+
+export enum AppointmentStatus {
+    Accepted = "accepted",
+    Rejected = "rejected",
+    Waiting = "waiting",
+    Canceled = "canceled"
+}

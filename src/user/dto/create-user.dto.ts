@@ -12,11 +12,11 @@ export class CreateUserDto {
     @ApiProperty({example: "GH"})
     readonly lastName: string;
 
-    @IsNotEmpty() @IsEmail() @Exclude({toPlainOnly: true})
+    @IsNotEmpty() @IsEmail() @Exclude({toPlainOnly: true})  // to not be used in UpdateDto class
     @ApiProperty({example: "liligh@gmail.com"})
     readonly email: string;
 
-    @IsNotEmpty() @IsStrongPassword() @Exclude({toPlainOnly: true})
+    @IsNotEmpty() @IsStrongPassword() @Exclude({toPlainOnly: true})  // to not be used in UpdateDto class
     @ApiProperty({example: "liLi2024#"})
     readonly password: string;
 

@@ -1,3 +1,5 @@
+import { DateHandlerModule } from './common/date-handler/date-handler.module';
+import { AppointmentModule } from './appointment/appointment.module';
 import { PatientApplicationModule } from './patient-application/patient-application.module';
 import { DocumentModule } from './document/document.module';
 import { AppController } from './app.controller';
@@ -25,6 +27,8 @@ import { DoctorApplicationModule } from './doctor-application/doctor-application
 
 @Module({
   imports: [
+    DateHandlerModule,
+    AppointmentModule,
     DoctorApplicationModule,
     PatientApplicationModule,
     ProvidersModule,

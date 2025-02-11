@@ -4,9 +4,9 @@ import { ApiProperty } from "@nestjs/swagger";
 export class ChangePasswordDto {
     @IsNotEmpty() @IsStrongPassword()
     @ApiProperty({example: "liLi2024#"})
-    oldPassword: string;
+    readonly oldPassword: string;
 
     @IsNotEmpty() @IsStrongPassword()
     @ApiProperty({example: "liLi2025#"})
-    newPassword: string;
+    readonly newPassword: string;
 }

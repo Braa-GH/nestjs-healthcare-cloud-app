@@ -7,8 +7,8 @@ export class CreateDoctorDto {
         return new ValidateSpecialtyIdPipe().transform(val, null) as any;
     })
     @ApiProperty({example: "spec-5c95"})
-    specialtyId: string;
+    readonly specialtyId: string;
 
     @IsOptional()
-    applicationId: string;
+    readonly applicationId: string;
 }

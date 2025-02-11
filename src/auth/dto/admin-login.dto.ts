@@ -7,9 +7,9 @@ export class AdminLoginDto {
         return ValidateAdminIdPipe.prototype.transform(val, null) as any;
     })
     @ApiProperty({example: "ad-012025-8f9b68"})
-    adminId: string;
+    readonly adminId: string;
 
     @IsNotEmpty() @IsStrongPassword()
     @ApiProperty({example: "liLi2024#"})
-    password: string;
+    readonly password: string;
 }

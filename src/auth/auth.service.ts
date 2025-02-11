@@ -49,7 +49,7 @@ export class AuthService {
     async doctorLogin({doctorId,password}: DoctorLoginDto){
         const doctor = await this.doctorService.findOne({id: doctorId});
         if(!doctor)
-            throw new BadRequestException("Invalid Doctor ID!")
+            throw new NotFoundException("Doctor is not exist!")
         const validatePassword = await this.userService.validatePassword(doctor.user, password);
         if(!validatePassword)
             throw new BadRequestException("Invalid Password!");
