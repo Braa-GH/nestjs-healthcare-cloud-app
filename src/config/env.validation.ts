@@ -1,6 +1,5 @@
 import { plainToInstance } from "class-transformer";
 import { IsEnum, IsNumber, IsString, validateSync } from "class-validator";
-import { DbTypes } from "src/common/types/db";
 
 enum Environment { 
    Development = "development", 
@@ -23,9 +22,6 @@ export class EnvironmentVariables {
 
     @IsString()
     readonly DB_HOST: string;
-
-    @IsString()
-    readonly DB_TYPE: DbTypes;
 
     @IsNumber()
     readonly DB_PORT: number;

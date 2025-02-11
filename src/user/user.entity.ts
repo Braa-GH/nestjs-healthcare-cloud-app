@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Timestamp } from "typeorm";
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Timestamp, BeforeInsert, AfterLoad } from "typeorm";
+// import * as bcrypt from "bcrypt";
 
 @Entity()
 export class User {
@@ -29,12 +30,22 @@ export class User {
     @Column({nullable: true})
     profileImg?: string;
 
-    // @Column({default: false, type: "boolean"})
-    // isVerified: boolean;
-
     @CreateDateColumn()
     createdAt: Timestamp;
 
     @UpdateDateColumn()
     updatedAt: Timestamp;
+
+    @BeforeInsert()
+    encryptPassword(){
+        // const salt = bcrypt.genSaltSync();
+        // const encryptedPassword = bcrypt.hashSync(this.password, salt);
+        // this.password = encryptedPassword;
+    }
+
+    @AfterLoad()
+    removeFields(){
+        // delete this.profileImg;
+    }
+
 }

@@ -1,3 +1,4 @@
+import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validateEnv } from 'src/config/env.validation';
@@ -6,9 +7,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSourceOptionsTypeOrm from 'src/config/db/typeorm-data-source';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
+import { RouterModule } from '@nestjs/core';
+import { routesConfig } from './config/routes-config';
 
 @Module({
   imports: [
+    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.development.env', '.production.env'],
@@ -27,6 +31,7 @@ import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
         return mongooseDataOptions(configService);
       },
     }),
+    RouterModule.register(routesConfig)
   ],
   controllers: [],
   providers: [],

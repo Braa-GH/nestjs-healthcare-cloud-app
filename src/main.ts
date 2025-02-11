@@ -15,13 +15,13 @@ async function bootstrap() {
     .setTitle("Nestjs Healthcare Cloud-based Application")
     .setDescription("")
     .setVersion("1.0")
-    .addBearerAuth({
-        type: "http", scheme: "bearer", bearerFormat: "JWT", in: "header", name: "JWT"
-    }, "JWT-auth")
+    // .addBearerAuth({
+    //     type: "http", scheme: "bearer", bearerFormat: "JWT", in: "header", name: "JWT"
+    // }, "JWT-auth")
     .build();
 
     const document = SwaggerModule.createDocument(app, documentConfig);
-    SwaggerModule.setup("/documentation", app, document);
+    SwaggerModule.setup("/api/documentation", app, document);
     
     const PORT = await app.get(ConfigService).get("port");
     await app.listen(PORT, () => {
