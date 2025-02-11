@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery, ApiParam } from "@nestjs/swagger";
 import { UpdateUserDto } from './dto/update-user.dto';
 import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
-import { ValidateUserIdPipe } from 'src/common/pipes/validate-user-id.pipe';
+import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
 import { FileInterceptor } from "@nestjs/platform-express";
 import { PROFILE_IMG_PATH } from 'src/common/paths';
 import { diskStorage } from 'multer';

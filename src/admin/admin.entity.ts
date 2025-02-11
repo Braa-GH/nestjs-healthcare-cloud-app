@@ -15,5 +15,5 @@ export class Admin {
 
     @OneToOne(() => User, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     @JoinColumn()
-    user: User;
+    user: User | any;
 }

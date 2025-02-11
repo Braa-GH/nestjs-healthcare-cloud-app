@@ -1,5 +1,6 @@
 export enum DbTypes {
-    postgres = "postgres"
+    postgres = "postgres",
+    mysql = "mysql"
 }
 
 export enum Sex {

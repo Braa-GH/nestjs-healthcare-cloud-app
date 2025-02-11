@@ -1,3 +1,4 @@
+import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,7 +14,9 @@ import { PatientModule } from './patient/patient.module';
 
 @Module({
   imports: [
-    UserModule, PatientModule,
+    AdminModule,
+    UserModule,
+    PatientModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.development.env', '.production.env'],
@@ -32,7 +35,7 @@ import { PatientModule } from './patient/patient.module';
         return mongooseDataOptions(configService);
       },
     }),
-    RouterModule.register(routesConfig)
+    RouterModule.register(routesConfig),
   ],
   controllers: [],
   providers: [],

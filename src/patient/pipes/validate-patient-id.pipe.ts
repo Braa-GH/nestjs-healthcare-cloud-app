@@ -4,8 +4,6 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 export class ValidatePatientIdPipe implements PipeTransform {
   transform(patientId: string, metadata: ArgumentMetadata) {
     const parts = patientId.split("-");
-    console.log(parts);
-    
     if(patientId.length !== 16 ||
        parts.length !== 3 ||
        parts[0] !== "pt" ||

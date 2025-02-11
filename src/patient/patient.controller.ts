@@ -1,9 +1,10 @@
 import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
 import { PatientService } from './patient.service';
-import { UserExistPipe } from 'src/common/pipes/user-exist.pipe';
-import { ValidateUserIdPipe } from 'src/common/pipes/validate-user-id.pipe';
-import { ValidatePatientIdPipe } from 'src/common/pipes/validate-patient-id.pipe';
+import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
+import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
+import { ValidatePatientIdPipe } from 'src/patient/pipes/validate-patient-id.pipe';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { PatientExistPipe } from './pipes/patient-exist.pipe';
 
 @Controller("patient")
 @ApiTags("Patient Endpoints")
@@ -18,7 +19,7 @@ export class PatientController {
         const patient = await this.patientService.findOne({userId});
         if(patient)
             throw new ForbiddenException("This user is already a patient!")
-        return this.patientService.create(userId);
+        return await this.patientService.create(userId);
         //send an email & notification with patient id to user
     }
 
@@ -49,7 +50,7 @@ export class PatientController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({summary: "Delete a patient by ID."})
     @ApiParam({name: "patientId", example: "pt-012025-217d83", required: false})
-    deletePatient(@Param("patientId", ValidatePatientIdPipe) patientId: string){
+    deletePatient(@Param("patientId", ValidatePatientIdPipe, PatientExistPipe) patientId: string){
         return this.patientService.delete(patientId);
     }
 }

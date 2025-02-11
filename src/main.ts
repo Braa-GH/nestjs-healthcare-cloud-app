@@ -10,10 +10,12 @@ async function bootstrap() {
         },
     });
 
+    const PORT = await app.get(ConfigService).get("port");
     // Swagger documentation
     const documentConfig = new DocumentBuilder()
     .setTitle("Nestjs Healthcare Cloud-based Application")
-    .setDescription("")
+    .setDescription(``)
+    .setBasePath(`http://localhost:${PORT}/api`)
     .setVersion("1.0")
     // .addBearerAuth({
     //     type: "http", scheme: "bearer", bearerFormat: "JWT", in: "header", name: "JWT"
@@ -23,7 +25,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, documentConfig);
     SwaggerModule.setup("/api/documentation", app, document);
     
-    const PORT = await app.get(ConfigService).get("port");
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);
     });
