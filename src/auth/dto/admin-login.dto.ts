@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class AdminLoginDto {
     @ValidateIf((obj, val) => {
-        return ValidateAdminIdPipe.prototype.transform(val, null) as any;
+        return ValidateAdminIdPipe.prototype.transform(val, null as any) as any;
     })
     @ApiProperty({example: "ad-012025-8f9b68"})
     readonly adminId: string;

@@ -2,15 +2,13 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import * as cookieParser from "cookie-parser";
+import { EmailService } from "./email/email.service";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         cors: {
             origin: "*"
         },
     });
-
-    app.use(cookieParser());
 
     app.setGlobalPrefix("/api",{exclude:["/profile", "/cookies"]})
 
@@ -47,6 +45,8 @@ async function bootstrap() {
     
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);
+        const emailService = app.get(EmailService);
+        // emailService.sendEmail("Nestjs Server is Listining!", "alghussainbraa2020@gmail.com");
     });
 }
 bootstrap();

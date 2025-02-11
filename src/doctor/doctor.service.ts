@@ -14,7 +14,11 @@ export class DoctorService {
 
     findOne({id, userId}: DoctorIdentifiers){
         const user = new User();
-        user.id = userId;
+        if (userId) {
+            user.id = userId;
+        } else {
+            throw new Error('User ID is undefined');
+        }
         return this.doctorRepo.findOne({
             where: [{id, user}],
             loadRelationIds: true

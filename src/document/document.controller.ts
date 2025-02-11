@@ -19,6 +19,7 @@ import { unlinkSync } from "fs";
 import { join } from "path";
 import { DocumentFileValidator } from "src/common/file-validators/document-files.validator";
 import { log } from "console";
+import { Document } from "./document.schema";
 
 @Controller("document")
 @ApiTags("Document Endpoints")
@@ -94,7 +95,7 @@ export class DocumentController {
            /* validators: [new DocumentFileValidator({})]*/
         })) files: Array<Express.Multer.File>
     ){
-        const document = await this.documentService.findOne(documentId);
+        const document = await this.documentService.findOne(documentId) as Document;
         const existFiles = document.files;
         existFiles.forEach(file => {
             const path = join(DOCUMENT_FILES_PATH, file);

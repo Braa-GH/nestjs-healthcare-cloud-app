@@ -4,10 +4,9 @@ import { Appointment } from './appointment.schema';
 import { Model } from 'mongoose';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { DateHandlerService } from 'src/common/date-handler/date-handler.service';
-import { log } from 'console';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FollowupDto } from './dto/followup.dto';
-import { parseJSON } from 'date-fns';
+import { Interval, parseJSON } from 'date-fns';
 import { AppointmentIdentifiers, AppointmentsIdentifiers } from 'src/common/types';
 import { AppointmentStatus } from 'src/common/enums';
 

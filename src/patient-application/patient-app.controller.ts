@@ -14,6 +14,7 @@ import { PatientService } from 'src/patient/patient.service';
 import { ApplicationExistPipe } from 'src/doctor-application/pipes/application-exist.pipe';
 import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
 import { EmailService } from 'src/email/email.service';
+import { PatientApplication } from './patient-application.schema';
 
 @Controller("patient-application")
 @ApiTags("Patient-Application Endpoints")
@@ -58,7 +59,7 @@ export class PatientApplicationController {
     @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
     async acceptApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
-        const application = await this.patientAppService.accept({_id: applicationId});
+        const application = await this.patientAppService.accept({_id: applicationId}) as PatientApplication;
         const patient = await this.patientService.create(application.userId, applicationId);
         //send Email with ID
         await this.emailService.sendPatientAcceptEmail(application.userId, patient._id);
@@ -71,7 +72,7 @@ export class PatientApplicationController {
     @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
     async rejectApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
-        const application = await this.patientAppService.reject({_id: applicationId});
+        const application = await this.patientAppService.reject({_id: applicationId}) as PatientApplication;
         //send Email with ID
         await this.emailService.sendPatientRejectionEmail(application.userId);
         return application;

@@ -25,7 +25,7 @@ export class PatientService {
 
     findOne({id, userId}: PatientIdentifiers){
         const user = new User()
-        user.id = userId;
+        user.id = userId as any;
         return this.patientRepo.findOne({
             where: [{id},{user}],
             // relations: ["user"],

@@ -1,7 +1,7 @@
 export default () => {
     return {
         environment: process.env.NODE_ENV,
-        port: parseInt(process.env.PORT),
+        port: parseInt(process.env.PORT as string),
         jwtSecretKey: process.env.JWT_Secret_Key,
         //db TypeOrm config
         dbType: process.env.DB_TYPE,
@@ -13,8 +13,8 @@ export default () => {
         //db Mongoose config
         mongoURI: process.env.MONG_URI,
         // Mailing
-        email: process.env.EMAIL,
-        emailPassword: process.env.EMAIL_PASSWORD
+        smtpEmail: process.env.SMTP_EMAIL,
+        smtpEmailPassword: process.env.SMTP_EMAIL_PASSWORD
 
     }
 }

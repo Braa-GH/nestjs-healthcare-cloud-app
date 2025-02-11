@@ -5,7 +5,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class DoctorLoginDto {
     @IsNotEmpty()
     @ValidateIf((obj,val) => {
-        return new ValidateDoctorIdPipe().transform(val, null) as any;
+        return new ValidateDoctorIdPipe().transform(val, null as any) as any;
     })
     @ApiProperty({example: "dr-012025-fdf717"})
     doctorId: string;

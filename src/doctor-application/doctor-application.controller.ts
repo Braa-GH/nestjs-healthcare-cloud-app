@@ -23,6 +23,7 @@ import { join } from 'path';
 import { CreateDoctorApplicationDto } from './dto/create-doctor-app.dto';
 import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
 import { EmailService } from 'src/email/email.service';
+import { DoctorApplication } from './doctor-application.schema';
 
 @Controller("doctor-application")
 @ApiTags("Doctor-Application Endpoints")
@@ -70,7 +71,7 @@ export class DoctorApplicationController {
     @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
     async acceptApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
-        const application = await this.doctorAppService.accept({_id: applicationId});
+        const application = await this.doctorAppService.accept({_id: applicationId}) as DoctorApplication;
         const doctor = await this.doctorService.create(application.userId, {
             specialtyId: application.specialtyId, applicationId
         });
@@ -85,7 +86,7 @@ export class DoctorApplicationController {
     @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
     async rejectApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
-        const application = await this.doctorAppService.reject({_id: applicationId});
+        const application = await this.doctorAppService.reject({_id: applicationId}) as DoctorApplication;
         //send Email with ID
         await this.emailService.sendDoctorRejectionEmail(application.userId);
     }
@@ -125,7 +126,7 @@ export class DoctorApplicationController {
             validators: [new DocumentFileValidator({})]
         })) degreeFile: Express.Multer.File
     ){
-        const application = await this.doctorAppService.findOne({_id: applicationId});
+        const application = await this.doctorAppService.findOne({_id: applicationId}) as any;
         if(application.degree){
             try{
                 const path = join(DOCUMENT_FILES_PATH, application.degree);

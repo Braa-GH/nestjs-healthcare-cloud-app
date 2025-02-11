@@ -41,10 +41,10 @@ export class EnvironmentVariables {
 
     //Mailing Config
     @IsEmail()
-    readonly EMAIL: string;
+    readonly SMTP_EMAIL: string;
 
     @IsString()
-    readonly EMAIL_PASSWORD: string;
+    readonly SMTP_EMAIL_PASSWORD: string;
 
 }
 

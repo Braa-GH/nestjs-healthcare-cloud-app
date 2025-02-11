@@ -31,7 +31,7 @@ export class UserController {
     @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     async findOne(@Param("userId") userId: string){
-        const user = await this.userService.findOne({id: userId});
+        const user = await this.userService.findOne({id: userId}) as any;
         if(!user)
             throw new NotFoundException("User Not Found!");
         delete user.password;

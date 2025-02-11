@@ -7,13 +7,12 @@ import { v4 as uuid } from "uuid";
 import { UserIdentifiers } from 'src/common/types';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from "bcrypt";
-import { ValidateUserIdPipe } from './pipes/validate-user-id.pipe';
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(User) private userRepo: Repository<User>){}
 
-    findOne(userIdentifiers: UserIdentifiers){
+    findOne(userIdentifiers: UserIdentifiers): Promise<User | null>{
         return this.userRepo.findOne({
             where: userIdentifiers
         });
@@ -31,17 +30,13 @@ export class UserService {
 
     async create(userDto: CreateUserDto){
         const id = uuid();
-        const isValid = new ValidateUserIdPipe().isValid(id);
-        if(!isValid)
-            return await this.create(userDto);
-
         const idExist = await this.findOne({id});
         if(idExist){
             //if generated Id is already exist in db, try again..
             return await this.create(userDto);
         }
         const user = this.userRepo.create({ ...userDto, id });
-        const row = await this.userRepo.save(user);
+        const row = await this.userRepo.save(user) as any;
         delete row.password;
         return row;
     }
@@ -56,6 +51,9 @@ export class UserService {
 
     async validatePassword(userId: string, password: string){
         const user = await this.findOne({id: userId});
+        if(!user){
+            throw new BadRequestException("User not found!");
+        }
         const compare = await bcrypt.compare(password, user.password);
         return compare ? true : false;
     }

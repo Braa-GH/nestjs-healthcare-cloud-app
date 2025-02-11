@@ -13,6 +13,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums';
 import { OwnerGuard } from 'src/auth/guards/owner.guard';
 import { DoctorApplicationService } from 'src/doctor-application/doctor-application.service';
+import { DoctorApplication } from 'src/doctor-application/doctor-application.schema';
 
 @Controller("doctor")
 @ApiTags("Doctor Endpoints")
@@ -71,7 +72,7 @@ export class DoctorController {
         const doctor = await this.doctorService.findOne({id: doctorId});
         if(!doctor)
             throw new NotFoundException("Doctor is not exist!");
-        const { documents, degree } = await this.doctorAppService.findOne({_id: doctor.applicationId});
+        const { documents, degree } = await this.doctorAppService.findOne({_id: doctor.applicationId}) as DoctorApplication;
         return {...doctor, documents, degree};
     }
 

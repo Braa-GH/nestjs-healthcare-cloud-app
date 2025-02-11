@@ -52,7 +52,7 @@ export class AppointmentController {
 
         const isOverlaps = appointments.find(appointment => {
             const oldInterval: Interval = {
-                start: parseJSON(appointment.startTime),
+                start: parseJSON(appointment.startTime as any),
                 end: appointment.endTime
             }
             return this.dateService.isPeriodsOverlapping(oldInterval, newInterval);
@@ -85,8 +85,8 @@ export class AppointmentController {
         
         const isOverlaps = appointments.find(appointment => {
             const oldInterval: Interval = {
-                start: parseJSON(appointment.startTime),
-                end: parseJSON(appointment.endTime)
+                start: parseJSON(appointment.startTime as any),
+                end: parseJSON(appointment.endTime as any)
             }
             console.log(oldInterval);
             

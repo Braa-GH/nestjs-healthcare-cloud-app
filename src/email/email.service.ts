@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from "nodemailer";
+import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -9,18 +10,38 @@ export class EmailService {
     private transporter: nodemailer.Transporter;
 
     constructor(private configService: ConfigService, private userService: UserService){
-        this.email = configService.get<string>("email");
+        this.email = configService.get<string>("smtpEmail") as string;
         this.transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            secure: false,
             auth: {
                 user: this.email,
-                pass: this.configService.get<string>("emailPassword")
-            }
+                pass: this.configService.get<string>("smtpEmailPassword")
+            },
         });
+    }
+
+    async sendEmail(text: string, target: string){
+        const message = `
+        <h2>Nestjs Healthcare Cloud App</h2>
+        <p>
+            ${text}
+        </p>
+        `
+        return await this.transporter.sendMail({
+            html: message,
+            from: this.email,
+            to: target,
+            subject: "Nestjs Server is Listining!",
+            text: "New Message"
+        })
     }
 
     async sendPatientAcceptEmail(userId: string, patientId: string){
         const user = await this.userService.findOne({id: userId});
+        if (!user) {
+            throw new Error('User not found');
+        }
         const target = user.email;
         const message = `
         <h2>${user.firstName} ${user.lastName}</h2>
@@ -44,7 +65,7 @@ export class EmailService {
     }
 
     async sendPatientRejectionEmail(userId: string){
-        const user = await this.userService.findOne({id: userId});
+        const user = await this.userService.findOne({id: userId}) as User;
         const target = user.email;
         const message = `
         <h2>${user.firstName} ${user.lastName}</h2>
@@ -61,7 +82,7 @@ export class EmailService {
     }
 
     async sendDoctorAcceptEmail(userId: string, doctorId: string){
-        const user = await this.userService.findOne({id: userId});
+        const user = await this.userService.findOne({id: userId}) as User;
         const target = user.email;
         const message = `
         <h2>${user.firstName} ${user.lastName}</h2>
@@ -86,7 +107,7 @@ export class EmailService {
     }
 
     async sendDoctorRejectionEmail(userId: string){
-        const user = await this.userService.findOne({id: userId});
+        const user = await this.userService.findOne({id: userId}) as User;
         const target = user.email;
         const message = `
         <h2>${user.firstName} ${user.lastName}</h2>

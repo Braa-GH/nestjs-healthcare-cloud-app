@@ -6,13 +6,13 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateAppointmentDto {
     @ValidateIf((obj, val) => {
-        return new ValidatePatientIdPipe().transform(val, null) as any;
+        return new ValidatePatientIdPipe().transform(val, null as any) as any;
     })
     @ApiProperty({example: "pt-012025-b26cb6"})
     readonly patientId: string;
 
     @ValidateIf((obj, val) => {
-        return new ValidateDoctorIdPipe().transform(val, null) as any;
+        return new ValidateDoctorIdPipe().transform(val, null as any) as any;
     })
     @ApiProperty({example: "dr-012025-3f00f9"})
     readonly doctorId: string;

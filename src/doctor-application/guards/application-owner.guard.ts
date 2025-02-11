@@ -12,7 +12,7 @@ export class ApplicationOwnerGuard implements CanActivate {
     const {userId} = request.user;
     const { applicationId } = request.params;
     return this.doctorAppService.findOne({_id: applicationId}).then(result => {
-      if(result.userId == userId)
+      if(result && result.userId == userId)
         request.user.role = Roles.Owner;
       return true;
     }).catch(err => {
