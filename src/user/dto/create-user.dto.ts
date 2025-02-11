@@ -1,6 +1,7 @@
 import { IsDateString, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from "class-validator";
 import { Sex } from "src/common/enums";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 
 export class CreateUserDto {
     @IsNotEmpty() @IsString()
@@ -11,11 +12,11 @@ export class CreateUserDto {
     @ApiProperty({example: "GH"})
     readonly lastName: string;
 
-    @IsNotEmpty() @IsEmail()
+    @IsNotEmpty() @IsEmail() @Exclude({toPlainOnly: true})
     @ApiProperty({example: "liligh@gmail.com"})
     readonly email: string;
 
-    @IsNotEmpty() @IsStrongPassword()
+    @IsNotEmpty() @IsStrongPassword() @Exclude({toPlainOnly: true})
     @ApiProperty({example: "liLi2024#"})
     readonly password: string;
 

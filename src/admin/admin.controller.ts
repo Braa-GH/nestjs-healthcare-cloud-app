@@ -1,13 +1,17 @@
 import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, Post } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
 import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
 import { ValidateAdminIdPipe } from './pipes/validate-admin-id.pipe';
 import { AdminExistPipe } from './pipes/admin-exist.pipe';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { Roles } from 'src/common/enums';
 
+@Auth(null, Roles.Admin)
 @Controller("admin")
 @ApiTags("Admin Endpoints")
+@ApiBearerAuth("JWT-Admin-Auth")
 export class AdminController {
     constructor(private adminService: AdminService){}
 

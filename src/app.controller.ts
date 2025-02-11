@@ -1,11 +1,14 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { Auth } from './auth/decorators/auth.decorator';
-import { Roles } from './common/enums';
+import { ApiBearerAuth } from "@nestjs/swagger";
+import { All_Roles } from './common/constants';
 
 @Controller()
 export class AppController {
     @Get("profile")
-    @Auth(Roles.Admin, Roles.Doctor, Roles.Patient, Roles.User)
+    @Auth(null, ...All_Roles)
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
+    @ApiBearerAuth("JWT-Doctor-Auth") @ApiBearerAuth("JWT-Patient-Auth")
     profile(@Req() req){
         return req.user;
     }

@@ -3,6 +3,7 @@ import { AdminModule } from "src/admin/admin.module";
 import { AppModule } from "src/app.module";
 import { AuthModule } from "src/auth/auth.module";
 import { DoctorModule } from "src/doctor/doctor.module";
+import { DocumentModule } from "src/document/document.module";
 import { PatientModule } from "src/patient/patient.module";
 import { SpecialtyModule } from "src/specialty/specialty.module";
 import { UserModule } from "src/user/user.module";
@@ -34,6 +35,10 @@ export const routesConfig: Routes = [
             {
                 path: "/",
                 module: AuthModule
+            },
+            {
+                path: "/",
+                module: DocumentModule
             }
         ]
     },

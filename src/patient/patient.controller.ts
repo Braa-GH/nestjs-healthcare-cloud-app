@@ -1,20 +1,24 @@
-import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
+import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
 import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
 import { ValidatePatientIdPipe } from 'src/patient/pipes/validate-patient-id.pipe';
-import { ApiTags, ApiOperation, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { PatientExistPipe } from './pipes/patient-exist.pipe';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { Roles } from 'src/common/enums';
+import { OwnerGuard } from 'src/auth/guards/owner.guard';
 
 @Controller("patient")
 @ApiTags("Patient Endpoints")
 export class PatientController {
     constructor(private patientService: PatientService){}
 
-    // admin guard
     @Post(":userId")
     @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({summary: "Make a user to be a patient"})
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Make a user to be a patient", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
     async createPatient(@Param('userId', ValidateUserIdPipe, UserExistPipe) userId: string){
         const patient = await this.patientService.findOne({userId});
         if(patient)
@@ -25,7 +29,9 @@ export class PatientController {
 
     @Get(':patientId')
     @HttpCode(HttpStatus.FOUND)
-    @ApiOperation({summary: "Find a patient by ID."})
+    @Auth(OwnerGuard, Roles.Admin, Roles.Doctor, Roles.Owner)
+    @ApiOperation({summary: "Find a patient by ID.", description: "Roles: [Admin,Doctor,Owner]"})
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-Patient-Auth") @ApiBearerAuth("JWT-Doctor-Auth")
     @ApiParam({name: "patientId", example: "pt-012025-217d83", required: true})
     async findOne(@Param("patientId", ValidatePatientIdPipe) patientId: string){
         const patient = await this.patientService.findOne({id: patientId});
@@ -36,7 +42,9 @@ export class PatientController {
 
     @Get()
     @HttpCode(HttpStatus.FOUND)
-    @ApiOperation({summary: "Find All Patients, use 'limit' and 'page' for pagination."})
+    @Auth(null, Roles.Admin, Roles.Doctor)
+    @ApiOperation({summary: "Find All Patients, use 'limit' and 'page' for pagination.", description: "Roles: [Admin,Doctor]"})
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-Doctor-Auth")
     @ApiQuery({name: "limit", example: "100", required: false})
     @ApiQuery({name: "page", example: "1", required: false})
     findAll(
@@ -48,7 +56,9 @@ export class PatientController {
 
     @Delete(":patientId")
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({summary: "Delete a patient by ID."})
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Delete a patient by ID.", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "patientId", example: "pt-012025-217d83", required: false})
     deletePatient(@Param("patientId", ValidatePatientIdPipe, PatientExistPipe) patientId: string){
         return this.patientService.delete(patientId);

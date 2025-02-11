@@ -1,3 +1,4 @@
+import { DocumentModule } from './document/document.module';
 import { AppController } from './app.controller';
 import { SpecialtyModule } from './specialty/specialty.module';
 import { DoctorModule } from './doctor/doctor.module';
@@ -11,13 +12,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSourceOptionsTypeOrm from 'src/config/db/typeorm-data-source';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
-import { RouterModule } from '@nestjs/core';
 import { routesConfig } from './config/routes-config';
 import { PatientModule } from './patient/patient.module';
 import { AuthModule } from './auth/auth.module';
+import { User } from './user/user.entity';
+import { Admin } from './admin/admin.entity';
+import { Doctor } from './doctor/doctor.entity';
+import { Patient } from './patient/patient.entity';
+import { ProvidersModule } from './common/dependencies-provider/providers.module';
 
 @Module({
   imports: [
+    ProvidersModule,
+    DocumentModule,
     AuthModule,
     SpecialtyModule,
     DoctorModule,
@@ -36,13 +43,14 @@ import { AuthModule } from './auth/auth.module';
         return dataSourceOptionsTypeOrm(configService);
       },
     }),
+    TypeOrmModule.forFeature([User, Admin, Doctor, Patient]),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return mongooseDataOptions(configService);
       },
     }),
-    RouterModule.register(routesConfig),
+    // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],
   providers: [],

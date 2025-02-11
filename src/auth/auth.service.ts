@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { UserService } from "src/user/user.service";
 import { UserLoginDto } from "./dto/user-login.dto";
-import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { PatientService } from "src/patient/patient.service";

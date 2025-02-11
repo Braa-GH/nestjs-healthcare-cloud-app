@@ -23,7 +23,9 @@ export class RolesGuard implements CanActivate {
 
     const roles: Roles[] = this.reflector.get("roles", context.getHandler());
     const isAuthorized = roles.includes(user.role);
-
+    console.log("Role:", user.role);
+    
+    
     if(isAuthorized){
       switch(user.role){
         case Roles.User:
@@ -42,12 +44,11 @@ export class RolesGuard implements CanActivate {
     }else{
       throw new UnauthorizedException(`Authorized roles: [${roles}]`);
     }
-    
     return true;
   }
 
-
-  validate(id: string, service: AdminService | DoctorService | PatientService | UserService){
+  validate(id: string, service: any){
+    
     return service.findOne({id}).then(result => {
       if(!result){
         throw new UnauthorizedException();

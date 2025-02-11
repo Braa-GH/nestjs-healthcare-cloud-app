@@ -14,28 +14,35 @@ import { unlinkSync } from 'fs';
 import { join } from 'path';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { Roles } from 'src/common/enums';
+import { User } from 'src/common/decorators/user.decorator';
+import { OwnerGuard } from '../auth/guards/owner.guard';
 
 @Controller("user")
 @ApiTags("User Endpoints")
-@ApiBearerAuth("JWT-Auth")
-@ApiBearerAuth("Admin-Auth")
 export class UserController {
     constructor(private userService: UserService){}
 
     @Get(":userId")
     @HttpCode(HttpStatus.FOUND)
-    @ApiOperation({summary: "Find specific user by ID"})
+    @Auth(OwnerGuard, Roles.Admin, Roles.Owner)
+    @ApiOperation({summary: "Find specific user by ID",description: "Roles: [Admin,Owner]"})
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     async findOne(@Param("userId") userId: string){
         const user = await this.userService.findOne({id: userId});
         if(!user)
             throw new NotFoundException("User Not Found!");
+        delete user.password;
         return user;
     }
 
     @Get()
     @HttpCode(HttpStatus.FOUND)
-    @ApiOperation({summary: "Find All Users"})
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Find All Users", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
     @ApiQuery({name: "limit", example: "100", required: false})
     @ApiQuery({name: "page", example: "1", required: false})
     findAll(
@@ -47,7 +54,9 @@ export class UserController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({summary: "Create New User"})
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Create New User", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     async createUser(@Body(ValidationPipe) userDto: CreateUserDto){
         const isExist = await this.userService.findOne({email: userDto.email});
         if(isExist)
@@ -57,15 +66,19 @@ export class UserController {
 
     @Patch("change-password")
     @UseGuards(JwtAuthGuard)
-    changePassword(@Body(ValidationPipe) passwordDto: ChangePasswordDto, @Req() req){
-        const userId = req.user.userId;
+    @ApiOperation({summary: "change user password.", description: "Roles: [Owner]"})
+    @ApiBearerAuth("JWT-User-Auth")
+    changePassword(@Body(ValidationPipe) passwordDto: ChangePasswordDto, @User() user){
+        const userId = user.userId;
         const { oldPassword, newPassword } = passwordDto;
         return this.userService.changePassword(userId, oldPassword, newPassword);
     }
 
     @Patch(":userId")
     @HttpCode(HttpStatus.OK)
+    @Auth(OwnerGuard, Roles.Owner, Roles.Admin)
     @ApiOperation({summary: "Update a specific user using ID"})
+    @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     updateUser(
         @Param("userId", ValidateUserIdPipe) userId: string,
@@ -76,7 +89,9 @@ export class UserController {
 
     @Delete(":userId")
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({summary: "Deleting a specific user by ID"})
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Deleting a specific user by ID", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     deleteUser(@Param("userId", ValidateUserIdPipe) userId: string){
         return this.userService.delete(userId);
@@ -84,6 +99,9 @@ export class UserController {
 
     @Post('upload-profile-img')
     @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({summary: "Upload Profile Image.", description: "Roles: [Owner]"})
+    @ApiBearerAuth("JWT-User-Auth")
     @UseInterceptors(FileInterceptor("profile-img", {
         storage: diskStorage({
             filename(req,file,cb){
@@ -94,18 +112,17 @@ export class UserController {
         })
     }))
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({summary: "upload profile image for a user!"})
     async uploadProfileImg(
-        @Req() req,
+        @User() user,
         @UploadedFile(
             new ParseFilePipe({
                 validators: [new ProfileImgValidator({})]
         })) image: Express.Multer.File
     ){
-        const { userId } = req.user;
-        const user = await this.findOne(userId);
-        if(user.profileImg){
-            const path = join(PROFILE_IMG_PATH, user.profileImg);
+        const { userId } = user;
+        const result = await this.findOne(userId);
+        if(result.profileImg){
+            const path = join(PROFILE_IMG_PATH, result.profileImg);
             unlinkSync(path);
         }
         return await this.userService.update(userId, {profileImg: image.filename});
