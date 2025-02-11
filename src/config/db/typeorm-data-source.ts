@@ -1,6 +1,6 @@
 import { ConfigService } from "@nestjs/config";
-import { DbTypes } from "src/common/types/db";
 import { DataSourceOptions } from "typeorm";
+import { DbTypes } from "src/common/types/db";
 
 const dataSourceOptionsTypeOrm = (configService: ConfigService): DataSourceOptions => {
     return {

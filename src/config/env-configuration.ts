@@ -1,7 +1,7 @@
 export default () => {
     return {
         environment: process.env.NODE_ENV,
-        port: parseInt(process.env.PORT as string),
+        port: parseInt(process.env.PORT as any),
         jwtSecretKey: process.env.JWT_Secret_Key,
         //db TypeOrm config
         dbType: process.env.DB_TYPE,
