@@ -9,10 +9,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
 import { RouterModule } from '@nestjs/core';
 import { routesConfig } from './config/routes-config';
+import { PatientModule } from './patient/patient.module';
 
 @Module({
   imports: [
-    UserModule,
+    UserModule, PatientModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.development.env', '.production.env'],

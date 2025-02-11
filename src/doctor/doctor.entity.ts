@@ -14,10 +14,10 @@ export class Doctor {
     @UpdateDateColumn()
     updatedAt: Timestamp;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     @JoinColumn()
     user: User;
 
-    @ManyToOne(() => Specialty, specialty => specialty.doctors)
+    @ManyToOne(() => Specialty, specialty => specialty.doctors, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     specialty: Specialty;
 }

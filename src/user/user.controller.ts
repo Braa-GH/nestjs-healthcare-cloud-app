@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, Res, UploadedFile, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, UploadedFile, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery, ApiParam } from "@nestjs/swagger";
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Response } from 'express';
 import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
 import { ValidateUserIdPipe } from 'src/common/pipes/validate-user-id.pipe';
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -21,17 +20,20 @@ export class UserController {
 
     @Get(":userId")
     @HttpCode(HttpStatus.FOUND)
-    @ApiOperation({summary: "Find specific user by ID", parameters: [{name: "userId", in: "path"}]})
-    async findOne(@Param("userId") userId: string, @Res({passthrough: true}) response: Response){
+    @ApiOperation({summary: "Find specific user by ID"})
+    @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
+    async findOne(@Param("userId") userId: string){
         const user = await this.userService.findOne({id: userId});
         if(!user)
-            response.status(HttpStatus.NOT_FOUND)
+            throw new NotFoundException("User Not Found!");
         return user;
     }
 
     @Get()
     @HttpCode(HttpStatus.FOUND)
     @ApiOperation({summary: "Find All Users"})
+    @ApiQuery({name: "limit", example: "100", required: false})
+    @ApiQuery({name: "page", example: "1", required: false})
     findAll(
         @Query("limit", new ParseIntPipe({optional: true})) limit: number,
         @Query("page", new ParseIntPipe({optional: true})) page: number
@@ -52,6 +54,7 @@ export class UserController {
     @Patch(":userId")
     @HttpCode(HttpStatus.OK)
     @ApiOperation({summary: "Update a specific user using ID"})
+    @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     updateUser(
         @Param("userId", ValidateUserIdPipe) userId: string,
         @Body(BodyNotEmptyPipe, ValidationPipe) userDto: UpdateUserDto
@@ -62,6 +65,7 @@ export class UserController {
     @Delete(":userId")
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({summary: "Deleting a specific user by ID"})
+    @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
     deleteUser(@Param("userId", ValidateUserIdPipe) userId: string){
         return this.userService.delete(userId);
     }

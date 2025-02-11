@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Timestamp, BeforeInsert, AfterLoad } from "typeorm";
-import * as bcrypt from "bcrypt";
+// import * as bcrypt from "bcrypt";
 
 @Entity()
 export class User {
@@ -38,9 +38,9 @@ export class User {
 
     @BeforeInsert()
     encryptPassword(){
-        const salt = bcrypt.genSaltSync();
-        const encryptedPassword = bcrypt.hashSync(this.password, salt);
-        this.password = encryptedPassword;
+        // const salt = bcrypt.genSaltSync();
+        // const encryptedPassword = bcrypt.hashSync(this.password, salt);
+        // this.password = encryptedPassword;
     }
 
     @AfterLoad()

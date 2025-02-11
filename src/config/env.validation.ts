@@ -23,6 +23,9 @@ export class EnvironmentVariables {
     @IsString()
     readonly DB_HOST: string;
 
+    @IsString()
+    readonly DB_TYPE: string;
+
     @IsNumber()
     readonly DB_PORT: number;
 

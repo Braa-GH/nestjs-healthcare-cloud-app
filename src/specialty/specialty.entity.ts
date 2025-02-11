@@ -17,7 +17,7 @@ export class Specialty {
     @UpdateDateColumn()
     updatedAt: Timestamp;
 
-    @OneToMany(() => Doctor, doctor => doctor.specialty)
+    @OneToMany(() => Doctor, doctor => doctor.specialty, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     doctors: Doctor[];
 
 }

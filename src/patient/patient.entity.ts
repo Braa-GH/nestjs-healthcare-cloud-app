@@ -13,7 +13,7 @@ export class Patient {
     @UpdateDateColumn()
     updatedAt: Timestamp;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, {onDelete: "CASCADE", onUpdate: "CASCADE"})
     @JoinColumn()
-    user: User;
+    user: any;
 }
