@@ -43,3 +43,9 @@ export type AppointmentsIdentifiers = {
     doctorId?: string,
     ignoreFollowups?: boolean
 }
+
+export type EmailOptions = {
+    to: string,
+    subject: string,
+    text: string
+}

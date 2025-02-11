@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IsEnum, IsNumber, IsString, validateSync } from "class-validator";
+import { IsEmail, IsEnum, IsNumber, IsString, validateSync } from "class-validator";
 
 enum Environment { 
    Development = "development", 
@@ -38,6 +38,13 @@ export class EnvironmentVariables {
     //DB MongoDb Config
     @IsString()
     readonly MONG_URI: string;
+
+    //Mailing Config
+    @IsEmail()
+    readonly EMAIL: string;
+
+    @IsString()
+    readonly EMAIL_PASSWORD: string;
 
 }
 

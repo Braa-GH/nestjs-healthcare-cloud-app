@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
+import { ApplicationStatus } from "src/common/enums";
 
 @Schema({timestamps: true, collection: "doctor-application"})
 export class DoctorApplication {
@@ -15,8 +16,8 @@ export class DoctorApplication {
     @Prop({type: [{type: mongoose.Schema.Types.ObjectId, ref: "Document"}]})
     documents: Document[];
 
-    @Prop({default: false})
-    isAccepted: boolean;
+    @Prop({default: ApplicationStatus.Waiting})
+    status: string;
 
     @Prop()
     specialtyId: string;

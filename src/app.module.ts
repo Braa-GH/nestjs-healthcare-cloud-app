@@ -1,3 +1,4 @@
+import { EmailModule } from './email/email.module';
 import { DateHandlerModule } from './common/date-handler/date-handler.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { PatientApplicationModule } from './patient-application/patient-application.module';
@@ -24,9 +25,12 @@ import { Doctor } from './doctor/doctor.entity';
 import { Patient } from './patient/patient.entity';
 import { ProvidersModule } from './common/dependencies-provider/providers.module';
 import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
+import { join } from 'path';
+// import { ServeStaticModule } from "@nestjs/serve-static";
 
 @Module({
   imports: [
+    EmailModule, 
     DateHandlerModule,
     AppointmentModule,
     DoctorApplicationModule,
@@ -58,6 +62,9 @@ import { DoctorApplicationModule } from './doctor-application/doctor-application
         return mongooseDataOptions(configService);
       },
     }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(process.cwd(), "client")
+    // }),
     // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],

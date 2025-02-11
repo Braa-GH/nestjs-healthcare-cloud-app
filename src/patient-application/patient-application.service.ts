@@ -4,6 +4,7 @@ import { PatientApplication } from '../patient-application/patient-application.s
 import { Model } from 'mongoose';
 import { PatientAppIdentifiers } from "src/common/types";
 import { Document } from "src/document/document.schema";
+import { ApplicationStatus } from "src/common/enums";
 
 @Injectable()
 export class PatientApplicationService {
@@ -23,7 +24,15 @@ export class PatientApplicationService {
     }
 
     accept(identifiers: PatientAppIdentifiers){
-        return this.patientAppModel.findOneAndUpdate(identifiers, {$set: {isAccepted: true}},{new: true});
+        return this.patientAppModel.findOneAndUpdate(identifiers, {$set: {
+            status: ApplicationStatus.Accepted
+        }},{new: true});
+    }
+
+    reject(identifiers: PatientAppIdentifiers){
+        return this.patientAppModel.findOneAndUpdate(identifiers, {
+            $set: {status: ApplicationStatus.Rejected}
+        },{new: true});
     }
 
     addDocument(identifiers: PatientAppIdentifiers, document: Document){

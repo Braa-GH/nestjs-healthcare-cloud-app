@@ -21,3 +21,9 @@ export enum AppointmentStatus {
     Waiting = "waiting",
     Canceled = "canceled"
 }
+
+export enum ApplicationStatus {
+    Accepted = "accepted",
+    Rejected = "rejected",
+    Waiting = "waiting",
+}

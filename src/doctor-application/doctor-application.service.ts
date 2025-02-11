@@ -5,6 +5,7 @@ import { DoctorAppIdentifiers } from "src/common/types";
 import { Document } from "src/document/document.schema";
 import { DoctorApplication } from "./doctor-application.schema";
 import { CreateDoctorApplicationDto } from "./dto/create-doctor-app.dto";
+import { ApplicationStatus } from "src/common/enums";
 
 @Injectable()
 export class DoctorApplicationService {
@@ -17,7 +18,7 @@ export class DoctorApplicationService {
 
     create(userId: string, appDto: CreateDoctorApplicationDto){
         return this.doctorAppModel.findOneAndUpdate({ userId }, { $set: {
-            userId, specialtyId: appDto.specialtyId
+            userId, specialtyId: appDto.specialtyId, status: ApplicationStatus.Waiting
         } },{upsert: true, new: true});
     }
 
@@ -26,7 +27,15 @@ export class DoctorApplicationService {
     }
 
     accept(identifiers: DoctorAppIdentifiers){
-        return this.doctorAppModel.findOneAndUpdate(identifiers, {$set: {isAccepted: true}},{new: true});
+        return this.doctorAppModel.findOneAndUpdate(identifiers, {
+            $set: {status: ApplicationStatus.Accepted}
+        },{new: true});
+    }
+
+    reject(identifiers: DoctorAppIdentifiers){
+        return this.doctorAppModel.findOneAndUpdate(identifiers, {
+            $set: {status: ApplicationStatus.Rejected}
+        },{new: true});
     }
 
     addDocument(identifiers: DoctorAppIdentifiers, document: Document){

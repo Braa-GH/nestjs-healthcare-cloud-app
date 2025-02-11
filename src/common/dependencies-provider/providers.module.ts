@@ -25,6 +25,8 @@ import { PatientApplication } from "src/patient-application/patient-application.
 import { DoctorApplicationModule } from "src/doctor-application/doctor-application.module";
 import { DoctorApplication } from "src/doctor-application/doctor-application.schema";
 import { DoctorApplicationService } from "src/doctor-application/doctor-application.service";
+import { EmailModule } from "src/email/email.module";
+import { EmailService } from "src/email/email.service";
 
 @Module({
   imports: [
@@ -35,20 +37,22 @@ import { DoctorApplicationService } from "src/doctor-application/doctor-applicat
         forwardRef(() => DocumentModule),
         forwardRef(() => PatientApplicationModule),
         forwardRef(() => DoctorApplicationModule),
+        forwardRef(() => EmailModule),
         SpecialtyModule,
         TypeOrmModule.forFeature([Admin, Doctor, Patient, User, Document, Specialty]),
         MongooseModule.forFeature([
           {name: Document.name, schema: documentSchema},
           {name: PatientApplication.name, schema: PatientApplication},
           {name: DoctorApplication.name, schema: DoctorApplication},
-        ])
+        ]),
+        
     ],
   providers: [
-    AdminService, DoctorService, PatientService, UserService,
+    AdminService, DoctorService, PatientService, UserService, EmailService,
     DocumentService, SpecialtyService, PatientApplicationService, DoctorApplicationService
   ],
   exports: [
-    AdminService, DoctorService, PatientService, UserService,
+    AdminService, DoctorService, PatientService, UserService, EmailService,
     DocumentService, SpecialtyService, PatientApplicationService, DoctorApplicationService
   ],
 })

@@ -11,6 +11,10 @@ export default () => {
         dbPassword: process.env.DB_PASSWORD,
         dbName: process.env.DB_NAME,
         //db Mongoose config
-        mongoURI: process.env.MONG_URI
+        mongoURI: process.env.MONG_URI,
+        // Mailing
+        email: process.env.EMAIL,
+        emailPassword: process.env.EMAIL_PASSWORD
+
     }
 }

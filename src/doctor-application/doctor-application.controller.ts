@@ -22,6 +22,7 @@ import { unlinkSync } from 'fs';
 import { join } from 'path';
 import { CreateDoctorApplicationDto } from './dto/create-doctor-app.dto';
 import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
+import { EmailService } from 'src/email/email.service';
 
 @Controller("doctor-application")
 @ApiTags("Doctor-Application Endpoints")
@@ -29,7 +30,8 @@ export class DoctorApplicationController {
     constructor(
         private doctorAppService: DoctorApplicationService,
         private documentService: DocumentService,
-        private doctorService: DoctorService
+        private doctorService: DoctorService,
+        private emailService: EmailService
     ){}
 
     @Post(":userId")
@@ -68,13 +70,24 @@ export class DoctorApplicationController {
     @ApiBearerAuth("JWT-Admin-Auth")
     @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
     async acceptApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
-        await this.doctorAppService.accept({_id: applicationId});
-        const application = await this.doctorAppService.findOne({_id: applicationId});
+        const application = await this.doctorAppService.accept({_id: applicationId});
         const doctor = await this.doctorService.create(application.userId, {
             specialtyId: application.specialtyId, applicationId
         });
         //send Email with ID
+        await this.emailService.sendDoctorAcceptEmail(doctor.userId, doctor._id);
         return doctor;
+    }
+
+    @Patch("reject/:applicationId")
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "reject doctor application for a user", description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
+    @ApiParam({name: "applicationId", example: "677da26cb0a98a0bf2167d49"})
+    async rejectApplication(@Param("applicationId", ParseMongoIdPipe, ApplicationExistPipe) applicationId: string){
+        const application = await this.doctorAppService.reject({_id: applicationId});
+        //send Email with ID
+        await this.emailService.sendDoctorRejectionEmail(application.userId);
     }
 
     @Post("add-document/:applicationId")
