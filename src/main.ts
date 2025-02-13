@@ -46,7 +46,7 @@ async function bootstrap() {
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);
         const emailService = app.get(EmailService);
-        // emailService.sendEmail("Nestjs Server is Listining!", "alghussainbraa2020@gmail.com");
+        emailService.sendEmail("Nestjs Server is Listining!", "alghussainbraa2020@gmail.com");
     });
 }
 bootstrap();
