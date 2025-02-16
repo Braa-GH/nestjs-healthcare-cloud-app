@@ -274,7 +274,7 @@
                 location: userLocation.value,
                 sex: sex.value,
             }
-            return fetch(`http://localhost:4000/api/user/${user.id}`, {
+            return fetch(`http://localhost:4000/api/user/${userId}`, {
                 method: "PATCH",
                 body: JSON.stringify(data),
                 headers: {
