@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Patient Application</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: none;
+        }
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .nav-link {
+            color: white;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="de-non d-md-flex flex-column p-3">
+        <h4 class="text-center">User Dashboard</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/user-dashboard.html">User Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="user-settings.html">Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-dark d-lg-none me-2" id="toggleSidebar">></button>
+                <a class="navbar-brand" href="#">Patient Application</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-dashboard.html">User Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="user-settings.html">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="logout()" style="cursor: pointer;">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container mt-4">
+            <div class="card card-header p-2 my-3">
+                <div class="d-flex align-items-start align-items-center gap-4">
+                    <img id="profile-img" src="assets/imgs/user.jpg" alt="user-img" class="d-block rounded-circle" height="100" width="100"/>
+                    <h1 id="user-name"></h1>
+                </div>
+                <span id="registered-since" class="text-muted ms-5"></span>
+                <p class="ms-5 mt-2">Create your Patient application, be sure to add necessary information and files!.</p>
+            </div>
+            <hr>
+            <h5>Patient Documents</h5>
+            <div id="documents"></div>
+
+            <div id="add-document" class="card">
+                    <div class="card-header" data-bs-toggle="collapse" href="#add-document-form">
+                        <h6>Add New Document</h6>
+                    </div>
+                    <form id="add-document-form" class="card-body collapse">
+                        <input type="text" class="form-control my-1" name="new-document-title" id="new-document-title" placeholder="Document Title">
+                        <textarea class="form-control my-1" name="new-document-desc" id="new-document-desc" placeholder="Document Description..."></textarea>
+                        <div id="new-doc-form">
+                            <input class="form-control my-1" type="file" name="files" multiple id="new-document-files">
+                        </div>
+                        <div class="d-flex gap-2 w-25 mt-2">
+                            <button class="btn btn-primary" type="button" onclick="addDocument()">Add</button>
+                            <button class="btn btn-outline-secondary" type="reset">reset</button>
+                        </div>
+                    </form>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        const userName = document.querySelector("#user-name");
+        const registeredSince = document.querySelector("#registered-since");
+        const profileImg = document.querySelector("#profile-img");
+        const docsContainer = document.querySelector("#documents");
+        const newDocTitle = document.querySelector("#new-document-title");
+        const newDocDesc = document.querySelector("#new-document-desc");
+        const newDocFiles = document.querySelector("#new-document-files");
+        const newDocForm = document.querySelector("#add-document-form");
+        let applicationId;
+
+        async function setData(){
+            const user = await getUser();
+            const { firstName, lastName, createdAt } = user;
+            userName.innerText = `${firstName} ${lastName}`;
+            const date = new Date(createdAt);
+            registeredSince.innerText = `user since ${date.toLocaleDateString()}`;
+
+            if(user.profileImg){
+                profileImg.src = `http://localhost:4000/api/user/${user.id}/profile-img`
+            }else{
+                profileImg.src = "assets/imgs/user.jpg";
+            }
+        }
+        setData()
+
+        async function setPatientApplicationInfo(){
+            let application = await getPatientApplication();
+            if(!application){
+                application = await createPatientApplication();
+            }
+            applicationId = application._id;
+            const appDocs = application.documents;
+            
+            if(appDocs.length > 0){
+                appDocs.forEach(doc => {
+                    const docElement = document.createElement("div");
+                    const files = doc.files;
+                    let filesEl = "";
+                    files.forEach(file => {
+                        filesEl += `
+                            <a target="_blank" href="http://localhost:4000/api/document/get-file/${file}" target="_blank" download>${file}</a></br>
+                        `;
+                    });
+                    
+                    docElement.innerHTML = `
+                    <div class="card my-3">
+                <div class="card-header" data-bs-toggle="collapse" href="#document-body-${doc._id}">
+                    <h5>${doc.title}</h5>
+                </div>
+                <div class="card-body" id="document-body-${doc._id}">
+                    <p>${doc.description}</p>
+                    <div>
+                        ${filesEl}
+                    </div>
+                    <div class="d-flex gap-2 p-2">
+                        <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#update-doc-modal-${doc._id}">update</button>
+                        <button class="btn btn-outline-danger" onclick="deleteDocument('${doc._id}')">delete</button>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="update-doc-modal-${doc._id}" data-bs-backdrop="static" tabindex="-1" style="display: none;" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="backDropModalTitle">Update Document</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="row">
+                            <div class="col mb-3">
+                              <label for="doc-${doc._id}-new-title" class="form-label">Title</label>
+                              <input type="text" id="doc-${doc._id}-new-title" class="form-control" placeholder="New Title" value="${doc.title}">
+                            </div>
+                          </div>
+                          <div class="row">
+                                <div class="col mb-3">
+                                    <label for="doc-${doc._id}-new-desc" class="form-label">Description</label>
+                                    <textarea id="doc-${doc._id}-new-desc" class="form-control" placeholder="New Description">${doc.description}</textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col mb-3">
+                                    <form id="update-doc-${doc._id}-form">
+                                        <label for="doc-${doc._id}-new-files" class="form-label">Description</label>
+                                        <input type="file" name="files" id="doc-${doc._id}-new-files" multiple class="form-control">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Close
+                          </button>
+                          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="updateDocument('${doc._id}')">Save</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+                    `;
+                    docsContainer.appendChild(docElement);
+                })
+
+            }
+
+        }
+
+        setPatientApplicationInfo()
+
+        async function updateDocument(documentId){
+            const newTitle = document.querySelector(`#doc-${documentId}-new-title`);
+            const newDesc = document.querySelector(`#doc-${documentId}-new-desc`);
+            const newFilesInput = document.querySelector(`#doc-${documentId}-new-files`);
+            const form = document.querySelector(`#update-doc-${documentId}-form`);
+
+            const data = {
+                title: newTitle.value,
+                description: newDesc.value
+            }
+            const updateResult = await updateDocumentData(documentId, data);
+            if(newFilesInput.files.length > 0){
+                const formData = new FormData(form);
+                await fetch(`http://localhost:4000/api/document/upload-files/${documentId}`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: localStorage.getItem("user-token")
+                    },
+                    body: formData
+                }).then(res => {
+                    window.location.reload();
+                })
+            }else{
+                window.location.reload();
+            }
+            
+        }
+
+        async function addDocument(){
+            const data = {
+                title: newDocTitle.value,
+                description: newDocDesc.value
+            }
+            const createdDoc = await addNewDocument(applicationId, data, "patient");
+            if(newDocFiles.files.length > 0){
+                const formData = new FormData(newDocForm);
+                console.log("pat app id",createdDoc._id);
+                
+                await fetch(`http://localhost:4000/api/document/upload-files/${createdDoc._id}`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        Authorization: localStorage.getItem("user-token")
+                    }
+                }).then(result => {
+                    window.location.reload();
+                });
+                
+            }else{
+                window.location.reload();
+            }
+
+
+        }
+
+    </script>
+</body>
+</html>

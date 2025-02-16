@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - User dashboard</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: none;
+        }
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .nav-link {
+            color: white;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="d-flex flex-column p-3">
+        <h4 class="text-center">User Dashboard</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="user-dashboard.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="user-settings.html">Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-dark d-lg-none me-2" id="toggleSidebar">></button>
+                <a class="navbar-brand" href="#">User Dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="user-dashboard.html">User Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="user-settings.html">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container mt-4 border-success">
+
+            <form id="profile-img-form" method="post" enctype="multipart/form-data" class="d-flex align-items-start align-items-center gap-3">
+                <img id="profile-img-show" src="assets/imgs/user.jpg" alt="user-img" class="d-block rounded-circle" height="100" width="100"/>
+                <label class="btn btn-primary" for="profile-img">
+                    <span>Upload Profile Img</span>
+                    <input type="file" hidden name="profile-img" id="profile-img">
+                </label>
+                <button id="reset-profile-img-btn" type="reset" class="btn btn-outline-secondary">reset img</button>
+                <hr/>
+            </form>
+
+            <div class="row mb-2">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="first-name">First Name</label>
+                    <input class="form-control" type="text" name="first-name" id="first-name" required value="">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="last-name">Last Name</label>
+                    <input class="form-control" type="text" name="last-name" id="last-name" required value="">
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="email">E-mail</label>
+                <input class="form-control" type="email" name="email" id="email" required value="">
+            </div>
+            <div class="row mb-2">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="dob">Birthday</label>
+                    <input class="form-control" type="date" name="dob" id="dob" required value="">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="dob">Sex</label>
+                    <select name="sex" id="sex" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="phone">Phone Number</label>
+                <input class="form-control" type="text" name="phone" required value="" id="phone">
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="location">Location</label>
+                <input class="form-control" type="text" name="location" value="" id="location">
+            </div>
+            <div class="d-flex align-items-end w-25 gap-2 py-3">
+                <button class="btn btn-primary w-50" id="submit-btn">update</button>
+                <button class="btn btn-outline-secondary w-50" id="reset-form-btn">reset</button>
+            </div>
+
+            <hr>
+            <h4 class="text-danger">Auth Settings (Be careful)</h4>
+            <div class="mb-2">
+                <label class="form-label" for="old-password">Old Password</label>
+                <input class="form-control" type="password" name="old-password" id="old-password" required value="">
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label" for="new-password">New Password</label>
+                <input class="form-control" type="password" name="new-password" id="new-password" required value="">
+            </div>
+            <div class="mb-2">
+                <button id="change-pass-btn" class="btn btn-outline-primary">Change Password</button>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        const profileImg = document.querySelector("#profile-img-show");
+        const resetProfileImgBtn = document.querySelector("#reset-profile-img-btn");
+        const smtBtn = document.querySelector("#submit-btn");
+        const profileImgForm = document.querySelector("#profile-img-form");
+        const resetFormBtn = document.querySelector("#reset-form-btn");
+        const profileImgInput = document.querySelector("#profile-img");
+        let defaultProfileImgSrc;  
+
+        const firstName = document.querySelector("#first-name");
+        const lastName = document.querySelector("#last-name");
+        const email = document.querySelector("#email");
+        const dob = document.querySelector("#dob");
+        const phone = document.querySelector("#phone");
+        const userLocation = document.querySelector("#location");
+        const sex = document.querySelector("#sex");
+
+        const oldPass = document.querySelector("#old-password");
+        const newPass = document.querySelector("#new-password");
+        const changePassBtn = document.querySelector("#change-pass-btn");
+        
+        async function setDefaultProfileImgSrc(){            
+            const user = await getUser();
+            if(user.profileImg){
+                defaultProfileImgSrc = `http://localhost:4000/api/user/${user.id}/profile-img`
+            }else{
+                defaultProfileImgSrc = "assets/imgs/user.jpg";
+            }
+        }
+
+        setDefaultProfileImgSrc();
+
+        async function setDefaults(){
+            const user = await getUser();
+            firstName.value = user.firstName;
+            lastName.value = user.lastName;
+            email.value = user.email;
+            dob.value = user.dob;
+            phone.value = user.phone;
+            userLocation.value = user.location;
+            sex.value = user.sex;
+            profileImg.src = defaultProfileImgSrc;
+        }
+
+        setDefaults();
+        profileImgInput.onchange = function(){
+            profileImg.src = URL.createObjectURL(profileImgInput.files[0]);
+        }
+        
+        resetProfileImgBtn.onclick = function(){
+            profileImg.src = defaultProfileImgSrc;
+            profileImgInput.value = null;
+        }
+
+        resetFormBtn.onclick = function(){
+            setDefaults();
+        }
+
+        smtBtn.onclick = async function(){
+            update().then(async (res) => {
+                const body = await res.json();
+                switch(res.status){
+                    case 200:
+                    case 201:
+                        alert("User Updated successfully!")
+                        break;
+                    case 400:
+                    default:
+                        window.alert(body.message)
+                }
+                
+            }).finally(async () => {
+                const uploadImgRes = await uploadProfileImg();
+            });
+        }
+
+        changePassBtn.onclick = async function() {
+            const isConfirm = confirm("WARNING: are you sure you want to change your password?");
+            if(isConfirm){
+                const result = await changePassword(oldPass.value, newPass.value);
+                const body = await result.json();
+                if(body.message){
+                    alert(body.message)
+                }else{
+                    if(result.status == 200){
+                        alert("your password has been changed successfully!");
+                    }
+                }
+            }
+        }
+
+    </script>
+    <script>
+        function uploadProfileImg(){
+            if(profileImgInput.files[0] != null){
+                const formdata = new FormData();
+                formdata.append("profile-img", profileImgInput.files[0]);
+                return fetch("http://localhost:4000/api/user/upload-profile-img", {
+                    method: "POST",
+                    body: formdata,
+                    headers: {
+                        Authorization: localStorage.getItem("user-token")
+                    },
+                })
+            }
+        }
+
+        async function update(){
+            const {userId} = await getData();
+            const data = {
+                firstName: firstName.value,
+                lastName: lastName.value,
+                email: email.value,
+                dob: dob.value,
+                phone: phone.value,
+                location: userLocation.value,
+                sex: sex.value,
+            }
+            return fetch(`http://localhost:4000/api/user/${user.id}`, {
+                method: "PATCH",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-type": "application/json",
+                    Authorization: localStorage.getItem("user-token")
+                }
+            })
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Patient Dashboard</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: none;
+        }
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .nav-link {
+            color: white;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+   <!-- Sidebar -->
+   <div id="sidebar" class="d-none d-md-flex flex-column p-3">
+        <h4 class="text-center">Patient Dashboard</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="patient-application.html">Update Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="logout()" style="cursor: pointer;">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+         <!-- Navbar -->
+         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-dark d-lg-none me-2" id="toggleSidebar">></button>
+                <a class="navbar-brand" href="#">Patient Dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="patient-application.html">Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container mt-4 px-5">
+            <hr>
+
+            <h4>My Appointments</h4>
+            <div class="d-flex align-items-center gap-2 my-2">
+                <input id="patient-apps-input" type="text" class="form-control" placeholder="search for appointment">
+                <button class="btn btn-outline-primary" onclick="appointmentSearch()">search</button>
+            </div>
+            <div id="appointments"></div>
+            <hr class="block my-3">
+            <h4>Find a Doctor</h4>
+            <div class="d-flex align-items-center gap-2 my-2">
+                <input id="patient-apps-input" type="text" class="form-control" placeholder="search by Name or ID">
+                <button class="btn btn-outline-primary" onclick="doctorSearch()">search</button>
+            </div>
+            <div id="doctors" class="row"></div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        const appointmentsContainer = document.querySelector("#appointments")
+        const doctorsContainer = document.querySelector("#doctors")
+        const doctorSearchInput = document.querySelector("#doctor-search-input");
+
+        function viewDoctors(doctors){
+            if(doctors.length > 0){
+                doctors.forEach(async doctor => {
+                    const user = await findUser(doctor.user, localStorage.getItem("patient-token"));
+                    const doctorApplication = await findDoctorApplication(doctor.user, localStorage.getItem("patient-token"));
+                    let imgSrc = "assets/imgs/user.jpg";
+                    let degree = `<a href="http://localhost:4000/api/document/get-file/${doctorApplication.degree}" target="_blank" download>Medical Degree File</a>`
+                    if(user.profileImg){
+                        imgSrc = `http://localhost:4000/api/user/${user.id}/profile-img`
+                    }
+                    const specialty = await findSpecialty(doctorApplication.specialtyId);
+                    let documents = '';
+                    if(doctorApplication.documents.length > 0){
+                        doctorApplication.documents.forEach(doc => {
+                        let files = '';
+                        if(doc.files.length > 0){
+                            doc.files.forEach(file => {
+                                files += `
+                                    <li>
+                                        <a href="http://localhost:4000/api/document/get-file/${file}" target="_blank" download>${file}</a>
+                                    </li>
+                                `;
+                            })
+                        }
+                        documents += `
+                            <div class="p-2 my-1" style="background-color: #eee;">
+                                <h6>${doc.title}</h6>
+                                <p>${doc.description}</p>
+                                files: <br>
+                                <ul>
+                                    ${files}
+                                </ul>
+                            </div>
+                        `;
+                    })
+                    }
+
+                    const doctorEl = `
+                    <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center gap-2" data-bs-toggle="collapse" href="#collpase-${doctor.id}">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="${imgSrc}" alt="user-img" class="d-block rounded-circle" height="30" width="30"/>
+                                Dr. ${user.firstName} ${user.lastName} <br>
+                            </div>
+                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#doctor-${doctor.id}-modal">Take appointment</button>
+                        </div>
+                        <div class="card-body" id="collpase-${doctor.id}">
+                            Specialty: ${specialty.name} <br>
+                            degree: ${degree} <br>
+                            <b>contact:</b> <br>
+                                phone: ${user.phone} <br>
+                                email: ${user.email} <br>
+                            documents:
+                            ${documents}
+                            <div class="modal fade" id="doctor-${doctor.id}-modal" data-bs-backdrop="static" tabindex="-1" style="display: none;" aria-hidden="true">
+                                <div class="modal-dialog">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                      <h5 class="modal-title" id="">Make Appointment with Dr.${user.firstName} ${user.lastName}</h5>
+                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-12 col-md-8 col-lg-6 d-flex align-items-center gap-2">
+                                                At <input class="form-control" type="datetime-local" id="doctor-${doctor.id}-app-start">
+                                            </div>
+                                        </div>
+                                        <div class="row my-2">
+                                            <div class="col-12 col-md-8 col-lg-6 d-flex align-items-center gap-2">
+                                                For <input class="form-control w-50" type="number" id="doctor-${doctor.id}-app-period"> minutes
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="makeAppointment('${doctor.id}')">make</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                    `;
+                    doctorsContainer.innerHTML += doctorEl;
+                });
+            }else{
+                doctorsContainer.innerHTML = "<span class='text-muted'>No Doctors Found</span>"
+            }
+        }
+
+        async function setDoctors(page){
+            const doctors = await getDoctors(page, localStorage.getItem("patient-token"));
+            if(doctors){
+                viewDoctors(doctors);
+            }else{
+                viewDoctors([]);
+            }
+        }
+        setDoctors(1);
+
+        
+        async function showAppointments(appointments){
+            if(appointments.length > 0){
+                await appointments.forEach(async appointment => {
+                    const { followups, status, startTime, endTime, periodInMinutes, doctorId } = appointment;
+                    const startDate = new Date(startTime);
+                    const endDate = new Date(endTime);
+                    const startDateEl = `${startDate.toDateString()} ${startDate.toLocaleTimeString()}`
+                    const endDateEl = `${endDate.toDateString()} ${endDate.toLocaleTimeString()}`
+                    console.log(doctorId);
+                    
+                    const doctor = await findDoctor(doctorId, localStorage.getItem("patient-token"));
+                    if(doctor){
+                        const user = await findUser(doctor.user, localStorage.getItem("patient-token"));
+                    let profileImgSrc = "assets/imgs/user.jpg";
+                    if(user.profileImg){
+                        profileImgSrc = `http://localhost:4000/api/user/${doctor.user}/profile-img`
+                    }
+                    let btns = "";
+                    let badge = "";
+                    let followupsEl = ``;
+                    if(followups.length > 0){
+                        followups.forEach(followup => {
+                            const followupStartDate = new Date(followup.startTime);
+                            const followupEndDate = new Date(followup.endTime);
+                            const followupStart = `${followupStartDate.toDateString()} ${ followupStartDate.toLocaleTimeString()}`
+                            const followupEnd = `${followupEndDate.toDateString()} ${ followupEndDate.toLocaleTimeString()}`
+                            followupsEl += `
+                                        <div>
+                                            you have a follow-up with this doctor <br>
+                                            at: ${followupStart} <br>
+                                            for: ${followup.periodInMinutes} minutes <br>
+                                            end: ${followupEnd}
+
+                                            <div class="py-2">
+                                                <button class="btn btn-outline-secondary" onclick="cancelFollowUp('${followup._id}')">cancel</button>
+                                            </div>
+                                        </div>
+                            `
+                        })
+                    }else{
+                        followupsEl = "<span class='text-muted'>No Followups</span>"
+                    }
+
+                    switch(status){
+                        case "waiting":
+                            badge = "<span class='badge bg-warning'>waiting</span>";
+                            btns = `
+                                    <button class="btn btn-outline-secondary" onclick="cancelAppointment('${appointment._id}')">cancel</button>
+                                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#update-appointment-${appointment._id}-modal">update</button>
+                                    `;
+                            break;
+                        case "accepted":
+                            badge = "<span class='badge bg-success'>accepted</span>";
+                            btns = `
+                                    <button class="btn btn-outline-secondary" onclick="cancelAppointment('${appointment._id}')">cancel</button>
+                                    `;
+                            break;
+                        case "rejected":
+                        badge = "<span class='badge bg-danger'>rejected</span>";
+                        btns = `
+                                <button class="btn btn-outline-secondary" onclick="cancelAppointment('${appointment._id}')">cancel</button>
+                                `;
+                            break;
+                        case "canceled":
+                            badge = "<span class='badge bg-secondary'>canceled</span>";
+                    }
+                    const appointmentEl = `
+                        <div class="card my-2" >
+                            <div class="card-header d-flex justify-content-start align-items-center gap-2" data-bs-toggle="collapse" href="#appointment-${appointment._id}">
+                                <img src="${profileImgSrc}" alt="user-img" class="d-block rounded-circle" height="30" width="30"/>
+                                <span>Dr. ${user.firstName} ${user.lastName}</span>
+                                ${badge}
+                            </div>
+
+                            <div id="appointment-${appointment._id}" class="card-body collapse">
+                                You have an Appointment with the Dr. ${user.firstName} ${user.lastName}. <br>
+                                <b>at:</b> ${startDateEl}<br>
+                                <b>for</b>: ${periodInMinutes} minutes <br>
+                                <b>end</b>: ${endDateEl}
+
+                                <div class="p-3 my-2" style="background-color: #eee;">
+                                    <h6>Follow-ups</h6>
+                                    ${followupsEl}
+                                </div>
+
+                                <div class="d-flx gap-2 pt-3 card-footer">
+                                    ${btns}
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="update-appointment-${appointment._id}-modal" data-bs-backdrop="static" tabindex="-1" style="display: none;" aria-hidden="true">
+                                <div class="modal-dialog">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                      <h5 class="modal-title" id="">Update Appointment</h5>
+                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-12 col-md-8 col-lg-6 d-flex align-items-center gap-2">
+                                                At <input class="form-control" type="datetime-local" value="${new Date(appointment.startTime).toISOString().split(".")[0]}" id="appointment-${appointment._id}-update-start">
+                                            </div>
+                                        </div>
+                                        <div class="row my-2">
+                                            <div class="col-12 col-md-8 col-lg-6 d-flex align-items-center gap-2">
+                                                For <input class="form-control w-50" type="number" value="${appointment.periodInMinutes}" id="appointment-${appointment._id}-update-period"> minutes
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="updateAppointment('${appointment._id}')">update</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                        </div>
+                        </div>
+                    `;
+                    }
+                    
+                });
+            }else {
+                appointmentsContainer.innerHTML = "<div>No Appointments!</div>"
+            }
+        }
+
+        async function setAppointments(){
+            const {patientId} = await getData(localStorage.getItem("patient-token"));
+            const appointments = await getPatientAppointments(patientId, localStorage.getItem("patient-token"));            
+            if(appointments){
+                showAppointments(appointments);
+            }else{
+                showAppointments([]);
+            }
+        }
+
+        setAppointments()
+
+
+        async function doctorSearch(){}
+    </script>
+    <script>
+        async function makeAppointment(doctorId){
+            const {patientId} = await getData(localStorage.getItem("patient-token"));
+            const startTime = document.querySelector(`#doctor-${doctorId}-app-start`).value;
+            const periodInMinutes = parseInt(document.querySelector(`#doctor-${doctorId}-app-period`).value);
+            createAppointment({doctorId, patientId, startTime, periodInMinutes});
+        }
+
+        async function updateAppointment(appId){
+            const startTime = document.querySelector(`#appointment-${appId}-update-start`).value;
+            const periodInMinutes = parseInt(document.querySelector(`#appointment-${appId}-update-period`).value);
+            await updateAppointmentAjax({startTime, periodInMinutes, appointmentId: appId}, localStorage.getItem("patient-token"));
+        }
+
+        function cancelAppointment(appId){
+            cancelAppointmentAjax(appId, localStorage.getItem("patient-token"))
+        }
+
+    </script>
+</body>
+</html>

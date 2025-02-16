@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - User dashboard</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: none;
+        }
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .nav-link {
+            color: white;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="d-none d-md-flex flex-column p-3">
+        <h4 class="text-center">User Dashboard</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="user-dashboard.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="user-settings.html">Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-dark d-lg-none me-2" id="toggleSidebar">></button>
+                <a class="navbar-brand" href="#">User Dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="user-settings.html">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="logout()" style="cursor: pointer;">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container mt-4">
+            <div class="card card-header p-2 my-3">
+                <div class="d-flex align-items-start align-items-center gap-4">
+                    <img id="profile-img" src="assets/imgs/user.jpg" alt="user-img" class="d-block rounded-circle" height="100" width="100"/>
+                    <h1 id="user-name"></h1>
+                </div>
+                <span id="registered-since" class="text-muted ms-5"></span>
+                <p class="ms-5 mt-2">Welcome to your User dashboard! Here you can manage your account.</p>
+            </div>
+
+            <div id="doctor-account" class="">
+                <div class="card p-4">
+                    <h3>Doctor Account</h3>
+                    <h5 id="doctor-info-content">
+                        You don't have a doctor account! if you are a doctor, we glad you to
+                        <a href="doctor-application.html">create a doctor application and request to be a doctor!</a>
+                    </h5>
+                </div>
+            </div>
+
+            <div id="patient-account" class="my-3">
+                <div class="card p-4">
+                    <h3>Patient Account</h3>
+                    <h5 id="patient-info-content">
+                        You don't have a patient account!
+                        <a href="patient-application.html">create patient application and request to be a patient!</a>
+                    </h5>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        const userName = document.querySelector("#user-name");
+        const registeredSince = document.querySelector("#registered-since");
+        const profileImg = document.querySelector("#profile-img");
+        const doctorInfo = document.querySelector("#doctor-info-content");
+        const patientInfo = document.querySelector("#patient-info-content");
+
+        async function setUserData(){
+            const user = await getUser();
+            const { firstName, lastName, email, password, dob, sex, createdAt } = user;
+            userName.innerText = `${firstName} ${lastName}`;
+            const date = new Date(createdAt);
+            registeredSince.innerText = `user since ${date.toLocaleDateString()}`;
+
+            if(user.profileImg){
+                profileImg.src = `http://localhost:4000/api/user/${user.id}/profile-img`
+            }else{
+                profileImg.src = "assets/imgs/user.jpg";
+            }
+        }
+        
+        getDoctor().then(result => {
+            if(result.id){
+                doctorInfo.innerHTML = `
+                    your Doctor ID is: <span class="text-info">${result.id}</span> <br>
+                    use it to
+                    <a href="doctor-login.html" class="text-success">Login as a Doctor<a/>
+                    and manage your patients
+                `;
+            }else{
+                getDoctorApplication().then(result => {
+                    switch(result.status){
+                        case "waiting":
+                            doctorInfo.innerHTML = `
+                                Your doctor application is waiting for Admin acceptance!
+                                <a href="doctor-application.html">you still can update it</a>
+                            `;
+                            break;
+                        case "rejected":
+                            doctorInfo.innerHTML = `
+                                Your doctor application is
+                                <span class="text-danger"> rejected </span>
+                                by an admin!
+                                <a href="doctor-application.html">try to create a new one</a>
+                                with more helpful information.
+                            `;
+                            break;
+                    }
+                    
+                })
+            }
+            return false;
+        });
+        
+
+        getPatient().then(result => {
+            if(result.id){
+                patientInfo.innerHTML = `
+                    your Patient ID is: <span class="text-info">${result.id}</span> <br>
+                    use it to
+                    <a href="patient-login.html" class="text-success">Login as a Patient<a/>
+                    and follow-up with your doctors
+                `;
+            }else {
+                getPatientApplication().then(result => {
+                    switch(result.status){
+                        case "waiting":
+                            patientInfo.innerHTML = `
+                                Your patient application is waiting for Admin acceptance!
+                                <a href="patient-application.html">you still can update it</a>
+                            `;
+                            break;
+                        case "rejected":
+                            patientInfo.innerHTML = `
+                                Your patient application is
+                                <span class="text-danger"> rejected </span>
+                                by an admin!
+                                <a href="patient-application.html">try to create a new one</a>
+                                with more helpful information.
+                            `;
+                            break;
+                    }
+                    
+                })
+            }
+        });
+
+        setUserData();
+        
+
+    </script>
+</body>
+</html>

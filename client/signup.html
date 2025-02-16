@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Signup</title>
+</head>
+<body style="background-color: #eef; height: 96vh;">
+        <div class="container mt-3 d-flex justify-content-center align-items-center">
+            <div class="card p-3">
+                <div class="my-3">
+                    <h3>Signup to create an account</h3>
+                </div>
+                <form id="profile-img-form" method="post" enctype="multipart/form-data" class="d-flex align-items-start align-items-center gap-3">
+                    <img id="profile-img-show" src="assets/imgs/user.jpg" alt="user-img" class="d-block rounded-circle" height="100" width="100"/>
+                    <label class="btn btn-primary" for="profile-img">
+                        <span>Upload Profile Img</span>
+                        <input type="file" hidden name="profile-img" id="profile-img">
+                    </label>
+                    <button id="reset-profile-img-btn" type="reset" class="btn btn-outline-secondary">reset img</button>
+                    <hr/>
+                </form>
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="first-name">First Name</label>
+                        <input class="form-control" type="text" name="first-name" id="first-name" required value="Braa">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="last-name">Last Name</label>
+                        <input class="form-control" type="text" name="last-name" id="last-name" required value="GH">
+                    </div>
+                </div>
+                <div class="">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input class="form-control" type="email" name="email" id="email" required value="braa@gmail.com">
+                </div>
+                <div class="">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" type="password" name="password" id="password" required value="braaGH2025#">
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="dob">Birthday</label>
+                        <input class="form-control" type="date" name="dob" id="dob" required value="2003-11-01">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="dob">Sex</label>
+                        <select name="sex" id="sex" class="form-select">
+                            <option value="male" selected>Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input class="form-control" type="text" name="phone" required value="+972561652789" id="phone">
+                </div>
+                <div class="">
+                    <label class="form-label" for="location">Location</label>
+                    <input class="form-control" type="text" name="location" value="Palestine, Gaza" id="location">
+                </div>
+                <div class="text-center py-3">
+                    <button class="btn btn-primary w-100" id="submit-btn">submit</button>
+                </div>
+
+                <div class="text-center">
+                    already have a user account?
+                    <a href="login.html">login</a>
+                </div>
+
+            </div>
+        </div>  
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script>
+        const profileImg = document.querySelector("#profile-img-show");
+        const resetProfileImgBtn = document.querySelector("#reset-profile-img-btn");
+        const smtBtn = document.querySelector("#submit-btn");
+        const profileImgForm = document.querySelector("#profile-img-form");
+        let profileImgInput = document.querySelector("#profile-img"),firstName,lastName,email,password,dob,phone,userLocation,sex;        
+
+        function updateData(){
+            profileImgInput = document.querySelector("#profile-img");
+            firstName = document.querySelector("#first-name").value;
+            lastName = document.querySelector("#last-name").value;
+            email = document.querySelector("#email").value;
+            password = document.querySelector("#password").value;
+            dob = document.querySelector("#dob").value;
+            phone = document.querySelector("#phone").value;
+            userLocation = document.querySelector("#location").value;
+            sex = document.querySelector("#sex").value;
+        }
+
+        profileImgInput.onchange = function(){
+            profileImg.src = URL.createObjectURL(profileImgInput.files[0])
+        }
+        
+        resetProfileImgBtn.onclick = function(){
+            profileImg.src = "assets/imgs/user.jpg";
+            profileImgInput.value = null;
+            console.log(profileImgInput.files)
+        }
+
+        smtBtn.onclick = async function(){
+            updateData();
+            const data = {firstName,lastName,email,password,dob,phone,sex,location:userLocation};
+            const response = await signup(data);
+            const body = await response.json();
+            switch(response.status){
+                case 200:
+                case 201:
+                    localStorage.setItem("user-token", `Bearer ${body.token}`)
+                    const uploadImgRes = await uploadProfileImg();
+                    const uploadImgResBody = await uploadImgRes.json();
+                    window.location.assign("/user-dashboard.html");
+                    break;
+                default:
+                    window.alert(body.message)
+            }
+        }
+    </script>
+    <script>
+        function signup(data){
+            return fetch("http://localhost:4000/api/auth/signup", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            })
+        }
+
+        function uploadProfileImg(){
+            if(profileImgInput.files[0] != null){
+                const formdata = new FormData(profileImgForm);
+                //formdata.append("profile-img", profileImgInput.files[0]);
+                /*const xhr = new XMLHttpRequest();
+                xhr.open("POST", "http://localhost:4000/api/user/upload-profile-img");
+                //xhr.setRequestHeader("Content-type","multipart/form-data");
+                xhr.setRequestHeader("Authorization", localStorage.getItem("user-token"));
+                xhr.send(formdata);
+                */
+                return fetch("http://localhost:4000/api/user/upload-profile-img", {
+                    method: "POST",
+                    body: formdata,
+                    headers: {
+                        Authorization: localStorage.getItem("user-token")
+                    },  
+                })
+            }
+            
+        }
+        
+    </script>
+</body>
+</html>

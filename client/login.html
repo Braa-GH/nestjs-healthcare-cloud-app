@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Login</title>
+</head>
+<body style="background-color: #eef; height: 96vh;">
+        <div class="container h-100 mt-3 d-flex justify-content-center align-items-center">
+            <div class="card p-3">
+                <div class="my-3">
+                    <h3>Login as a User</h3>
+                </div>
+                <div class="">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input class="form-control" type="email" name="email" id="email" required value="braa@gmail.com">
+                </div>
+                <div class="">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" type="password" name="password" id="password" required value="liLi2024#">
+                </div>
+                <div class="text-center py-3">
+                    <button class="btn btn-primary w-100" id="submit-btn">login</button>
+                </div>
+                <div class="text-center">
+                    already have a user account?
+                    <a href="signup.html">create account</a>
+                </div>
+
+            </div>
+        </div>  
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script>
+        const smtBtn = document.querySelector("#submit-btn");
+        let email,password;       
+
+        function updateData(){
+            email = document.querySelector("#email").value;
+            password = document.querySelector("#password").value;
+        }
+
+        smtBtn.onclick = async function(){
+            updateData();
+            const data = {email,password};
+            const response = await login(data);
+            const body = await response.json();
+            switch(response.status){
+                case 200:
+                case 201:
+                    localStorage.setItem("user-token", `Bearer ${body.token}`)
+                    window.location.assign("/user-dashboard.html");
+                    break;
+                default:
+                    window.alert(body.message)
+            }
+        }
+    </script>
+    <script>
+        function login(data){
+            return fetch("http://localhost:4000/api/auth/user-login", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            })
+        }
+    </script>
+</body>
+</html>

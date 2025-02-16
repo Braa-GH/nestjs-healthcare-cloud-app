@@ -62,6 +62,9 @@ import { ServeStaticModule } from "@nestjs/serve-static";
         return mongooseDataOptions(configService);
       },
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), "client")
+    }),
     // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],
