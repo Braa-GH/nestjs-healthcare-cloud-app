@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { EmailService } from "./email/email.service";
+import { SeedService } from "./seed/seed.service";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         cors: {
@@ -44,6 +45,10 @@ async function bootstrap() {
     SwaggerModule.setup("/api/documentation", app, document, {
         jsonDocumentUrl: "swagger/json"
     });
+
+    //seed Root Admin
+    const seedService = app.get(SeedService);
+    await seedService.seedRootAdmin();
     
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);

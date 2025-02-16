@@ -13,8 +13,8 @@ export default () => {
         //db Mongoose config
         mongoURI: process.env.MONG_URI,
         // Mailing
-        email: process.env.EMAIL,
-        emailPassword: process.env.EMAIL_PASSWORD
+        smtpEmail: process.env.SMTP_EMAIL,
+        smtpEmailPassword: process.env.SMTP_EMAIL_PASSWORD
 
     }
 }

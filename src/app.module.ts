@@ -1,3 +1,5 @@
+import { SeedService } from './seed/seed.service';
+import { SeedModule } from './seed/seed.module';
 import { EmailModule } from './email/email.module';
 import { DateHandlerModule } from './common/date-handler/date-handler.module';
 import { AppointmentModule } from './appointment/appointment.module';
@@ -26,11 +28,12 @@ import { Patient } from './patient/patient.entity';
 import { ProvidersModule } from './common/dependencies-provider/providers.module';
 import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
 import { join } from 'path';
-import { ServeStaticModule } from "@nestjs/serve-static";
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
-    EmailModule, 
+    SeedModule,
+    EmailModule,
     DateHandlerModule,
     AppointmentModule,
     DoctorApplicationModule,
@@ -63,11 +66,11 @@ import { ServeStaticModule } from "@nestjs/serve-static";
       },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), "client")
+      rootPath: join(process.cwd(), 'client'),
     }),
     // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [SeedService],
 })
 export class AppModule {}
