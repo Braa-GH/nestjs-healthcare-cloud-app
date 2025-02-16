@@ -9,12 +9,13 @@ export class ProfileImgValidator extends FileValidator{
         if(!imageMimeTypes.includes(mimetype)){
             unlinkSync(path);
             throw new UnprocessableEntityException("png or jpg image expected!");
-        }else if(size > 900000){
-            try{
-                unlinkSync(path);
-            }catch(err){}
-            throw new UnprocessableEntityException("900kb max size limited!");
         }
+        // else if(size > 900000){
+        //     try{
+        //         unlinkSync(path);
+        //     }catch(err){}
+        //     throw new UnprocessableEntityException("900kb max size limited!");
+        // }
         return true;
     }
     buildErrorMessage(file: any): string {

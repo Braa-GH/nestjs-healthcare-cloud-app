@@ -20,7 +20,10 @@ export class Appointment {
     startTime: Date;
 
     @Prop({type: mongoose.Schema.Types.Date, required: true})
-    endTime: Date;
+    endTime;
+
+    @Prop()
+    periodInMinutes: number
 
     @Prop({default: false})
     isFollowup: boolean;

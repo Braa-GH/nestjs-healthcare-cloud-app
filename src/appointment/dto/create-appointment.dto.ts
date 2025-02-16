@@ -22,7 +22,7 @@ export class CreateAppointmentDto {
     @ApiProperty({example: "2025-10-01T04:00:00"})
     readonly startTime: string | any;
 
-    @IsNotEmpty() @IsNumber({allowInfinity:false, allowNaN: false})
+    @IsNotEmpty() @IsNumber()
     @ApiProperty({example: 25})
     readonly periodInMinutes: number;
 

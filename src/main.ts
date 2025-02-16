@@ -10,7 +10,7 @@ async function bootstrap() {
         },
     });
 
-    app.setGlobalPrefix("/api",{exclude:["/profile", "/cookies"]})
+    app.setGlobalPrefix("/api",{exclude:["/", "/profile"]})
 
     const PORT = await app.get(ConfigService).get("port");
     // Swagger documentation
@@ -23,7 +23,7 @@ async function bootstrap() {
             - Doctor: All Doctors registered to the system can process the endpoint.
             - Patient: All Patients registered to the system can process the endpoint.
             - Owner: Owner of the schema can process the endpoint.
-        `)
+    `)
     .setBasePath(`http://localhost:${PORT}/api`)
     .setVersion("1.0")
     .addBearerAuth({
@@ -41,7 +41,9 @@ async function bootstrap() {
     .build();
 
     const document = SwaggerModule.createDocument(app, documentConfig);
-    SwaggerModule.setup("/api/documentation", app, document);
+    SwaggerModule.setup("/api/documentation", app, document, {
+        jsonDocumentUrl: "swagger/json"
+    });
     
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);

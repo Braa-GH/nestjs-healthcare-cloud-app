@@ -16,7 +16,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSourceOptionsTypeOrm from 'src/config/db/typeorm-data-source';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
-import { routesConfig } from './config/routes-config';
+// import { routesConfig } from './config/routes-config';
 import { PatientModule } from './patient/patient.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/user.entity';
@@ -26,7 +26,7 @@ import { Patient } from './patient/patient.entity';
 import { ProvidersModule } from './common/dependencies-provider/providers.module';
 import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
 import { join } from 'path';
-// import { ServeStaticModule } from "@nestjs/serve-static";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 @Module({
   imports: [
@@ -62,9 +62,6 @@ import { join } from 'path';
         return mongooseDataOptions(configService);
       },
     }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(process.cwd(), "client")
-    // }),
     // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],

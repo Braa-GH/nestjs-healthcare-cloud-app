@@ -5,11 +5,11 @@ import { unlinkSync } from "fs";
 export class DocumentFileValidator extends FileValidator{
     isValid(file?: IFile | IFile[] | Record<string, IFile[]>): boolean | Promise<boolean> {
         const { path, size } = file as any;
-        if(size > 900000){
+        if(size > (200000 * 1024)){
             try{
                 unlinkSync(path);
             }catch(err){}
-            throw new UnprocessableEntityException("900kb max size limited!");
+            throw new UnprocessableEntityException("2000kb max size limited!");
         }
         return true;
     }

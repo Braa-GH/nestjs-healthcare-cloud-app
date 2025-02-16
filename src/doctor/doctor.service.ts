@@ -7,18 +7,19 @@ import { DoctorIdentifiers } from 'src/common/types';
 import { User } from 'src/user/user.entity';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
+import { SpecialtyService } from 'src/specialty/specialty.service';
+import { Specialty } from 'src/specialty/specialty.entity';
 
 @Injectable()
 export class DoctorService {
-    constructor(@InjectRepository(Doctor) private doctorRepo: Repository<Doctor>){}
+    constructor(
+        @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
+        private specialtyService: SpecialtyService
+    ){}
 
     findOne({id, userId}: DoctorIdentifiers){
         const user = new User();
-        if (userId) {
-            user.id = userId;
-        } else {
-            throw new Error('User ID is undefined');
-        }
+        user.id = userId as string;
         return this.doctorRepo.findOne({
             where: [{id, user}],
             loadRelationIds: true
@@ -43,8 +44,9 @@ export class DoctorService {
         if(idExist){
             return await this.create(userID, doctorDto);
         }
+        const specialty = await this.specialtyService.findOne({id: doctorDto.specialtyId}) as Specialty;
         const doctor = this.doctorRepo.create({
-            id: doctorId, user: userID, ...doctorDto
+            id: doctorId, user: userID, ...doctorDto, specialty
         });
         return await this.doctorRepo.upsert(doctor, {conflictPaths: {user: true}});
     }

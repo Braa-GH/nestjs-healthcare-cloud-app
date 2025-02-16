@@ -20,7 +20,8 @@ export class AuthController {
     async signup(@Body(ValidationPipe) userDto: CreateUserDto){
         if(await this.userService.findOne({email: userDto.email}))
             throw new ForbiddenException("user with this email is already exist!");
-        return await this.userService.create(userDto);
+        await this.userService.create(userDto);
+        return await this.userLogin({email: userDto.email, password: userDto.password});
     }
 
     @Post("user-login")

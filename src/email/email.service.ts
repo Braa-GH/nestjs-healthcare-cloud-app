@@ -28,13 +28,17 @@ export class EmailService {
             ${text}
         </p>
         `
+       try{
         return await this.transporter.sendMail({
             html: message,
             from: this.email,
             to: target,
             subject: "Nestjs Server is Listining!",
             text: "New Message"
-        })
+        });
+       }catch(err){
+        console.log("failed to send email!");
+       }
     }
 
     async sendPatientAcceptEmail(userId: string, patientId: string){
@@ -73,12 +77,12 @@ export class EmailService {
             Your Patient Application Is <span style="color:red">Rejected</span>
         </p>
         `
-        return await this.transporter.sendMail({
-            html: message,
-            from: this.email,
-            to: target,
-            subject: "Patient Application Rejection!"
-        })
+        // return await this.transporter.sendMail({
+        //     html: message,
+        //     from: this.email,
+        //     to: target,
+        //     subject: "Patient Application Rejection!"
+        // })
     }
 
     async sendDoctorAcceptEmail(userId: string, doctorId: string){

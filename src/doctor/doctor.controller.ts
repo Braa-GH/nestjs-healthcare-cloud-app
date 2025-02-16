@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
 import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
@@ -13,6 +13,8 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums';
 import { OwnerGuard } from 'src/auth/guards/owner.guard';
 import { DoctorApplicationService } from 'src/doctor-application/doctor-application.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { User } from 'src/common/decorators/user.decorator';
 import { DoctorApplication } from 'src/doctor-application/doctor-application.schema';
 
 @Controller("doctor")
@@ -62,6 +64,22 @@ export class DoctorController {
         return this.doctorService.findAll(limit = limit, page = page);
     }
 
+    @Get('is-doctor')
+    @UseGuards(JwtAuthGuard)
+    async isDoctor(@User() user){
+        const doctor =await this.doctorService.findOne({userId: user.userId});
+        if(doctor){
+            return {
+                status: true,
+                doctor
+            }
+        }else{
+            return {
+                status: false
+            }
+        }
+    }
+
     @Get(":doctorId")
     @Auth(null, Roles.Admin, Roles.Patient, Roles.Doctor)
     @HttpCode(HttpStatus.FOUND)
@@ -72,7 +90,10 @@ export class DoctorController {
         const doctor = await this.doctorService.findOne({id: doctorId});
         if(!doctor)
             throw new NotFoundException("Doctor is not exist!");
-        const { documents, degree } = await this.doctorAppService.findOne({_id: doctor.applicationId}) as DoctorApplication;
+        const application = await this.doctorAppService.findOne({_id: doctor.applicationId}) as DoctorApplication;
+        console.log(doctor.applicationId);
+        
+        const { documents, degree } = application;
         return {...doctor, documents, degree};
     }
 
@@ -98,4 +119,6 @@ export class DoctorController {
     async deleteDoctor(@Param("doctorId", ValidateDoctorIdPipe, DoctorExistPipe) doctorId: string){
         return this.doctorService.delete(doctorId);
     }
+
+    
 }
