@@ -10,7 +10,7 @@ import { SpecialtyModule } from './specialty/specialty.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
-import { Module } from '@nestjs/common';
+import { Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validateEnv } from 'src/config/env.validation';
 import configuration from 'src/config/env-configuration';
@@ -29,6 +29,8 @@ import { ProvidersModule } from './common/dependencies-provider/providers.module
 import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -73,4 +75,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
   controllers: [AppController],
   providers: [SeedService],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
