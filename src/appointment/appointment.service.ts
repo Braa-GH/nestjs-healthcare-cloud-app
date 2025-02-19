@@ -19,7 +19,7 @@ export class AppointmentService {
 
     async create(appointmentDto: CreateAppointmentDto){
         let { startTime, periodInMinutes } = appointmentDto;
-        startTime = parseJSON(startTime);
+        startTime = parseJSON(new Date(startTime) as any);
         const endTime = this.dateService.getEndTime(startTime, periodInMinutes);
         return this.appointmentModel.create({...appointmentDto, startTime, endTime});
     }
@@ -34,15 +34,20 @@ export class AppointmentService {
         const patientDoctorFilters = {$or:[ patientCondition, doctorCondition]};
         const followupsFilter = ignoreFollowups ? {isFollowup: false}: {};
         const filters = {$and: [patientDoctorFilters, followupsFilter]};  
+        
         return this.appointmentModel.find(filters).populate("followups");
     }
 
     getDoctorAppointments(doctorId: string){
-        return this.findAll({doctorId, ignoreFollowups: true});
+        return this.appointmentModel.find({
+            doctorId, isFollowup: false
+        }).populate(["followups"])
     }
 
     getPatientAppointments(patientId: string){
-        return this.findAll({patientId, ignoreFollowups: true});
+        return this.appointmentModel.find({
+            patientId, isFollowup: false
+        }).populate(["followups"])
     }
 
     async addFollowup(appointmentId: string, followupDto: FollowupDto | any){

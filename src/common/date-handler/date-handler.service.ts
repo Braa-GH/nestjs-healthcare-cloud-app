@@ -8,6 +8,8 @@ export class DateHandlerService {
     }
 
     isPeriodsOverlapping(first: Interval, last: Interval): boolean {
+        console.log("first", first);
+        console.log("last", last);
         return areIntervalsOverlapping(first, last);
     }
 }

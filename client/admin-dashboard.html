@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Admin Dashboard</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: none;
+        }
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .nav-link {
+            color: white;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+   <!-- Sidebar -->
+   <div id="sidebar" class="d-none d-md-flex flex-column p-3">
+        <h4 class="text-center">Admin Dashboard</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="user-dashboard.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="doctors.html">Doctors</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="patients.html">Patients</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="logout()" style="cursor: pointer;">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content">
+         <!-- Navbar -->
+         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="btn btn-dark d-lg-none me-2" id="toggleSidebar">></button>
+                <a class="navbar-brand" href="#">Admin Dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="doctors.html">Doctors</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Patients</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container mt-4">
+            <h3>Doctors Applications Requests</h3>
+            <div class="d-flex align-items-center gap-2 my-2">
+                <input id="doctor-apps-input" type="text" class="form-control" placeholder="search by Name or ID">
+                <button class="btn btn-outline-primary" onclick="doctorAppsSearch()">search</button>
+            </div>
+            <div id="doctor-applications" class=""></div>
+
+            <hr>
+
+            <h3>Patients Applications Requests</h3>
+            <div class="d-flex align-items-center gap-2 my-2">
+                <input id="patient-apps-input" type="text" class="form-control" placeholder="search by Name or ID">
+                <button class="btn btn-outline-primary" onclick="patientAppsSearch()">search</button>
+            </div>
+            <div id="patient-applications" class=""></div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="ajax.js"></script>
+    <script>
+        const doctorApplicationsContainer = document.querySelector("#doctor-applications")
+        const patientApplicationsContainer = document.querySelector("#patient-applications")
+        const doctorAppSearchInput = document.querySelector("#doctor-apps-input");
+        const patientAppSearchInput = document.querySelector("#patient-apps-input");
+        
+        
+
+        async function setDoctorAppsData(doctorApplications) {
+            
+            if(doctorApplications.length == 0){
+                doctorApplicationsContainer.innerHTML = `<span class="text-muted">No Applications</span>`;
+            }
+            
+            await doctorApplications.forEach(async app => {
+                const user = await findUser(app.userId, localStorage.getItem("admin-token"));
+                let imgSrc = "assets/imgs/user.jpg";
+                let statusBadge;
+                let degree;
+                let documents = "";
+                let specialty;
+                let btns ="";
+                if(user.profileImg){
+                    imageSrc = `http://localhost:4000/api/user/${app.userId}/profile-img`;
+                }
+                switch (app.status) {
+                    case "waiting":
+                        statusBadge = "<span class='badge bg-warning'>waiting for admin acceptance</span>"
+                        btns = `
+                            <button class="btn btn-success" onclick="acceptDoctorApp('${app._id}')">accept</button>
+                            <button class="btn btn-warning" onclick="rejectDoctorApp('${app._id}')">reject</button>
+                        `
+                        break;
+                    case "accepted":
+                        statusBadge = "<span class='badge bg-success'>accepted</span>"
+                        btns = `
+                            <button class="btn btn-warning" onclick="rejectDoctorApp('${app._id}')">reject</button>
+                        `
+                        break;
+                    case "rejected":
+                        statusBadge = "<span class='badge bg-danger'>rejected</span>"
+                        btns = `
+                            <button class="btn btn-success" onclick="acceptDoctorApp('${app._id}')">accept</button>
+                            <button class="btn btn-warning" onclick="rejectDoctorApp('${app._id}')">reject</button>
+                        `
+                        break;
+                }
+                if(app.degree){
+                    degree = `<a href="http://localhost:4000/api/document/get-file/${app.degree}" target="_blank" download>Medical Degree File</a>`
+                }else{
+                    degree = "<span class='text-danger'>No Medical degree provided</span>";
+                }
+                if(app.specialtyId){
+                    const specialtyRes = await findSpecialty(app.specialtyId);
+                    if(specialtyRes){
+                        specialty = specialtyRes.name;
+                    }else{
+                        specialty = "<span class='text-danger'>not provided</span>"
+                    }
+                }
+                if(app.documents.length > 0){
+                    app.documents.forEach(doc => {
+                        let files = "";
+                        if(doc.files.length > 0){
+                            doc.files.forEach(file => {
+                                const link =  `
+                                 <a class="" href="http://localhost:4000/api/document/get-file/${file}" download>${file}</a></br>
+                                `;
+                                files += link;
+                            });
+                        }
+                        const document = `
+                            <div class="p-3 mb-2" style="background-color:#eee">
+                                <h5>${doc.title}</h5>
+                                <p>${doc.description}</p>
+                                ${files}
+                            </div>
+                        `;
+                        documents += document;
+                    });
+                }
+                const application = `
+                    <div class="card my-2" >
+                        <div class="card-header d-flex justify-content-start align-items-center gap-2" data-bs-toggle="collapse" href="#application-${app._id}">
+                            <img src="${imageSrc}" alt="user-img" class="d-block rounded-circle" height="30" width="30"/>
+                            <span>${user.firstName} ${user.lastName}</span>
+                            ${statusBadge}
+                        </div>
+                        <div id="application-${app._id}" class="card-body collapse">
+                            <div class="p-1" style="background-color:#eee">
+                                Medical Degree: ${degree}
+                            </div>
+                            <div class="p-1 my-1" style="background-color:#eee">
+                                Specialty: ${specialty}
+                            </div>
+                            <br>
+                            ${documents}
+                            <div class="card-footer">
+                                ${btns}
+                                <button class="btn btn-danger" onclick="deleteDoctorApp('${app._id}')">delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                doctorApplicationsContainer.innerHTML += application;
+            });
+        }
+
+        async function setPatientAppsData(patientApplications) {
+
+            if(patientApplications.length == 0){
+                patientApplicationsContainer.innerHTML = `<span class="text-muted">No Applications</span>`;
+            }
+            
+            await patientApplications.forEach(async app => {
+                const user = await findUser(app.userId, localStorage.getItem("admin-token"));
+                let imgSrc = "assets/imgs/user.jpg";
+                let statusBadge;
+                let documents = "";
+                let btns ="";
+                if(user.profileImg){
+                    imageSrc = `http://localhost:4000/api/user/${app.userId}/profile-img`;
+                }
+                switch (app.status) {
+                    case "waiting":
+                        statusBadge = "<span class='badge bg-warning'>waiting for admin acceptance</span>"
+                        btns = `
+                            <button class="btn btn-success" onclick="acceptPatientApp('${app._id}')">accept</button>
+                            <button class="btn btn-warning" onclick="rejectPatientApp('${app._id}')">reject</button>
+                        `
+                        break;
+                    case "accepted":
+                        statusBadge = "<span class='badge bg-success'>accepted</span>"
+                        btns = `
+                            <button class="btn btn-warning" onclick="rejectPatientApp('${app._id}')">reject</button>
+                        `
+                        break;
+                    case "rejected":
+                        statusBadge = "<span class='badge bg-danger'>rejected</span>"
+                        btns = `
+                            <button class="btn btn-success" onclick="acceptPatientApp('${app._id}')">accept</button>
+                        `
+                        break;
+                }
+                if(app.documents.length > 0){
+                    app.documents.forEach(doc => {
+                        let files = "";
+                        if(doc.files.length > 0){
+                            doc.files.forEach(file => {
+                                const link =  `
+                                 <a class="" href="http://localhost:4000/api/document/get-file/${file}" download>${file}</a></br>
+                                `;
+                                files += link;
+                            });
+                        }
+                        const document = `
+                            <div class="p-3 mb-2" style="background-color:#eee">
+                                <h5>${doc.title}</h5>
+                                <p>${doc.description}</p>
+                                ${files}
+                            </div>
+                        `;
+                        documents += document;
+                    });
+                }
+                const application = `
+                    <div class="card my-2" >
+                        <div class="card-header d-flex justify-content-start align-items-center gap-2" data-bs-toggle="collapse" href="#application-${app._id}">
+                            <img src="${imageSrc}" alt="user-img" class="d-block rounded-circle" height="30" width="30"/>
+                            <span>${user.firstName} ${user.lastName}</span>
+                            ${statusBadge}
+                        </div>
+                        <div id="application-${app._id}" class="card-body collapse">
+                            <br>
+                            ${documents}
+                            <div class="card-footer">
+                                ${btns}
+                                <button class="btn btn-danger" onclick="deletePatientApp('${app._id}')">delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                patientApplicationsContainer.innerHTML += application;
+            });
+        }
+        
+
+        async function updateDoctorApps(page){
+            let doctorApplications = await getDoctorsApplications(page);
+            await setDoctorAppsData(doctorApplications);
+        }
+
+        async function updatePatientApps(page){
+            let patientApplications = await getPatientsApplications(page);
+            await setPatientAppsData(patientApplications);
+        }
+        
+        updateDoctorApps(1);
+        updatePatientApps(1);
+    </script>
+
+    <script>
+        async function acceptDoctorApp(id){
+            const res = await acceptApplication(id, "doctor");
+            if(res.status == 200){
+                alert("application accepted successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function rejectDoctorApp(id){
+            const res = await rejectApplication(id, "doctor");
+            if(res.status == 200){
+                alert("application rejected successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function deleteDoctorApp(id){
+            const res = await deleteApplication(id, "doctor");
+            if(res.status == 200){
+                alert("application deleted successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function acceptPatientApp(id){
+            const res = await acceptApplication(id, "patient");
+            if(res.status == 200){
+                alert("application accepted successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function rejectPatientApp(id){
+            const res = await rejectApplication(id, "patient");
+            if(res.status == 200){
+                alert("application rejected successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function deletePatientApp(id){
+            const res = await deleteApplication(id, "patient");
+            if(res.status == 200){
+                alert("application deleted successfully!")
+                window.location.reload()
+            }
+        }
+
+        async function doctorAppsSearch(){
+            const key = doctorAppSearchInput.value;
+            const doctorApps = await doctorAppSearch(key);
+            if(doctorApps){
+                await setDoctorAppsData(doctorApps)
+            }else{
+                await setDoctorAppsData([]);
+            }
+        }
+    </script>
+</body>
+</html>

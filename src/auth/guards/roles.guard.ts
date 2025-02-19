@@ -51,10 +51,10 @@ export class RolesGuard implements CanActivate {
     
     return service.findOne({id}).then(result => {
       if(!result){
-        throw new UnauthorizedException("invalid role");
+        return new UnauthorizedException("invalid role");
       }
     }).catch(err => {
-      throw err || new UnauthorizedException();
+      return err || new UnauthorizedException();
     });
   }
 }

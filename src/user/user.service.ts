@@ -7,12 +7,13 @@ import { v4 as uuid } from "uuid";
 import { UserIdentifiers } from 'src/common/types';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from "bcrypt";
+import { ValidateUserIdPipe } from './pipes/validate-user-id.pipe';
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(User) private userRepo: Repository<User>){}
 
-    findOne(userIdentifiers: UserIdentifiers): Promise<User | null>{
+    findOne(userIdentifiers: UserIdentifiers){
         return this.userRepo.findOne({
             where: userIdentifiers
         });
@@ -30,6 +31,10 @@ export class UserService {
 
     async create(userDto: CreateUserDto){
         const id = uuid();
+        const isValid = new ValidateUserIdPipe().isValid(id);
+        if(!isValid)
+            return await this.create(userDto);
+
         const idExist = await this.findOne({id});
         if(idExist){
             //if generated Id is already exist in db, try again..

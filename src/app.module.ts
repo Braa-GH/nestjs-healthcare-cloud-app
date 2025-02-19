@@ -1,3 +1,5 @@
+import { SeedService } from './seed/seed.service';
+import { SeedModule } from './seed/seed.module';
 import { EmailModule } from './email/email.module';
 import { DateHandlerModule } from './common/date-handler/date-handler.module';
 import { AppointmentModule } from './appointment/appointment.module';
@@ -8,7 +10,7 @@ import { SpecialtyModule } from './specialty/specialty.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
-import { Module } from '@nestjs/common';
+import { Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validateEnv } from 'src/config/env.validation';
 import configuration from 'src/config/env-configuration';
@@ -16,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSourceOptionsTypeOrm from 'src/config/db/typeorm-data-source';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseDataOptions } from 'src/config/db/mongoose-data-options';
-import { routesConfig } from './config/routes-config';
+// import { routesConfig } from './config/routes-config';
 import { PatientModule } from './patient/patient.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/user.entity';
@@ -26,11 +28,14 @@ import { Patient } from './patient/patient.entity';
 import { ProvidersModule } from './common/dependencies-provider/providers.module';
 import { DoctorApplicationModule } from './doctor-application/doctor-application.module';
 import { join } from 'path';
-// import { ServeStaticModule } from "@nestjs/serve-static";
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { MiddlewareConsumer } from '@nestjs/common';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 @Module({
   imports: [
-    EmailModule, 
+    SeedModule,
+    EmailModule,
     DateHandlerModule,
     AppointmentModule,
     DoctorApplicationModule,
@@ -62,12 +67,16 @@ import { join } from 'path';
         return mongooseDataOptions(configService);
       },
     }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(process.cwd(), "client")
-    // }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'client'),
+    }),
     // RouterModule.register(routesConfig),
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [SeedService],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

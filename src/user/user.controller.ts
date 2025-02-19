@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery, ApiParam } from "@nestjs/swagger";
@@ -10,7 +10,7 @@ import { PROFILE_IMG_PATH } from 'src/common/paths';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
 import { ProfileImgValidator } from 'src/common/file-validators/profile-img.validator';
-import { unlinkSync } from 'fs';
+import { createReadStream, unlinkSync } from 'fs';
 import { join } from 'path';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -26,7 +26,7 @@ export class UserController {
 
     @Get(":userId")
     @HttpCode(HttpStatus.FOUND)
-    @Auth(OwnerGuard, Roles.Admin, Roles.Owner)
+    @Auth(OwnerGuard, Roles.Admin, Roles.Owner, Roles.Doctor, Roles.Patient)
     @ApiOperation({summary: "Find specific user by ID",description: "Roles: [Admin,Owner]"})
     @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "userId", required: true, example: "5ecc9d58-5d2c-4a6b-aa04-3653b2c09c2b"})
@@ -121,6 +121,7 @@ export class UserController {
     ){
         const { userId } = user;
         const result = await this.findOne(userId);
+        
         if(result.profileImg){
             const path = join(PROFILE_IMG_PATH, result.profileImg);
             try{
@@ -130,5 +131,17 @@ export class UserController {
             }
         }
         return await this.userService.update(userId, {profileImg: image.filename});
+    }
+
+    @Get(':userId/profile-img')
+    // @UseGuards(JwtAuthGuard)
+    async getProfileImg(@Param('userId') userId: string, @Res() res: any){
+        const user = await this.userService.findOne({id: userId}) as any;
+        if(!user.profileImg){
+            throw new NotFoundException('user do not have a profile picture')
+        }
+        const path = `${PROFILE_IMG_PATH}/${user.profileImg}`;
+        const file = createReadStream(path);
+        await file.pipe(res);
     }
 }

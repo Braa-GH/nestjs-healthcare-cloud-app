@@ -28,13 +28,17 @@ export class EmailService {
             ${text}
         </p>
         `
+       try{
         return await this.transporter.sendMail({
             html: message,
             from: this.email,
             to: target,
             subject: "Nestjs Server is Listining!",
             text: "New Message"
-        })
+        });
+       }catch(err){
+        console.log("failed to send email!");
+       }
     }
 
     async sendPatientAcceptEmail(userId: string, patientId: string){
@@ -56,12 +60,16 @@ export class EmailService {
             your password is still the same.
         </p>
         `
-        return await this.transporter.sendMail({
-            html: message,
-            from: this.email,
-            to: target,
-            subject: "Patient Application Accepted!"
-        })
+        try{
+            return await this.transporter.sendMail({
+                html: message,
+                from: this.email,
+                to: target,
+                subject: "Patient Application Accepted!"
+            })
+        }catch(err){
+            console.log("failed to send email!");
+        }
     }
 
     async sendPatientRejectionEmail(userId: string){
@@ -73,12 +81,16 @@ export class EmailService {
             Your Patient Application Is <span style="color:red">Rejected</span>
         </p>
         `
-        return await this.transporter.sendMail({
-            html: message,
-            from: this.email,
-            to: target,
-            subject: "Patient Application Rejection!"
-        })
+        try {
+            return await this.transporter.sendMail({
+                html: message,
+                from: this.email,
+                to: target,
+                subject: "Patient Application Rejection!"
+            })
+        } catch (error) {
+            console.log("failed to send email!");
+        }
     }
 
     async sendDoctorAcceptEmail(userId: string, doctorId: string){
@@ -98,12 +110,17 @@ export class EmailService {
             your password is still the same.
         </p>
         `
-        return await this.transporter.sendMail({
-            html: message,
-            from: this.email,
-            to: target,
-            subject: "Doctor Application Accepted!"
-        })
+        try{
+            return await this.transporter.sendMail({
+                html: message,
+                from: this.email,
+                to: target,
+                subject: "Doctor Application Accepted!"
+            })
+        }catch(error){
+            console.log("failed to send email!");
+        }
+        
     }
 
     async sendDoctorRejectionEmail(userId: string){
@@ -115,11 +132,15 @@ export class EmailService {
             Your Doctor Application Is <span style="color:red">Rejected</span>
         </p>
         `
+       try {
         return await this.transporter.sendMail({
             html: message,
             from: this.email,
             to: target,
             subject: "Doctor Application Rejection!"
         })
+       } catch (error) {
+        console.log("failed to send email!");
+       }
     }
 }
