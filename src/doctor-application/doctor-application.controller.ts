@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseFilePipe, Patch, Post, UploadedFile, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Head, NotFoundException, Param, ParseFilePipe, ParseIntPipe, Patch, Post, Query, UploadedFile, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from "@nestjs/swagger";
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums';
@@ -23,6 +23,7 @@ import { join } from 'path';
 import { CreateDoctorApplicationDto } from './dto/create-doctor-app.dto';
 import { BodyNotEmptyPipe } from 'src/common/pipes/validate-body.pipe';
 import { EmailService } from 'src/email/email.service';
+import { UserService } from 'src/user/user.service';
 import { DoctorApplication } from './doctor-application.schema';
 
 @Controller("doctor-application")
@@ -32,7 +33,8 @@ export class DoctorApplicationController {
         private doctorAppService: DoctorApplicationService,
         private documentService: DocumentService,
         private doctorService: DoctorService,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private userService: UserService
     ){}
 
     @Post(":userId")
@@ -48,12 +50,27 @@ export class DoctorApplicationController {
     }
 
     @Get(":userId")
-    @Auth(OwnerGuard, Roles.Admin, Roles.Owner)
-    @ApiOperation({summary: "Get doctor application for a user",description: "Roles: [Admin, Owner-User]"})
+    @Auth(OwnerGuard, Roles.Admin, Roles.Owner, Roles.Patient)
+    @ApiOperation({summary: "Get doctor application for a user",description: "Roles: [Admin, Owner-User, Patient]"})
     @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "userId", example: "4ba68bb1-3c3d-47fa-94d5-a1620d8969d5"})
     async getApplication(@Param("userId", ValidateUserIdPipe) userId: string){
-        return this.doctorAppService.findOne({userId});
+        const application = await this.doctorAppService.findOne({userId});
+        if(!application)
+            throw new NotFoundException();
+        return application;
+    }
+
+    @Get()
+    @Auth(null, Roles.Admin)
+    @ApiOperation({summary: "Get all doctor application",description: "Roles: [Admin]"})
+    @ApiBearerAuth("JWT-Admin-Auth")
+    async getAllApplication(
+        @Query("limit", new ParseIntPipe({optional: true})) limit: number,
+        @Query("page", new ParseIntPipe({optional: true})) page: number
+    ){
+        const applications = await this.doctorAppService.findAll(limit, page);
+        return applications;
     }
 
     @Delete(":applicationId")

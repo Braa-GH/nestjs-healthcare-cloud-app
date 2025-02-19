@@ -1,4 +1,4 @@
-import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { UserExistPipe } from 'src/user/pipes/user-exist.pipe';
 import { ValidateUserIdPipe } from 'src/user/pipes/validate-user-id.pipe';
@@ -8,6 +8,8 @@ import { PatientExistPipe } from './pipes/patient-exist.pipe';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { Roles } from 'src/common/enums';
 import { OwnerGuard } from 'src/auth/guards/owner.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { User } from 'src/common/decorators/user.decorator';
 
 @Controller("patient")
 @ApiTags("Patient Endpoints")
@@ -27,6 +29,22 @@ export class PatientController {
         //send an email & notification with patient id to user
     }
 
+    @Get('is-patient')
+    @UseGuards(JwtAuthGuard)
+    async isDoctor(@User() user){
+        const patient = await this.patientService.findOne({userId: user.userId});
+        if(patient){
+            return {
+                status: true,
+                patient
+            }
+        }else{
+            return {
+                status: false
+            }
+        }
+    }
+
     @Get(':patientId')
     @HttpCode(HttpStatus.FOUND)
     @Auth(OwnerGuard, Roles.Admin, Roles.Doctor, Roles.Owner)
@@ -39,6 +57,8 @@ export class PatientController {
             throw new NotFoundException("Patient is not exist!")
         return patient;
     }
+
+
 
     @Get()
     @HttpCode(HttpStatus.FOUND)
@@ -63,5 +83,6 @@ export class PatientController {
     deletePatient(@Param("patientId", ValidatePatientIdPipe, PatientExistPipe) patientId: string){
         return this.patientService.delete(patientId);
     }
+
 
 }

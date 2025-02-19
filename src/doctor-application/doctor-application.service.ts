@@ -16,6 +16,13 @@ export class DoctorApplicationService {
         return this.doctorAppModel.findOne(identifiers).populate(["documents"]);
     }
 
+    findAll(limit = 100, page = 1){
+        const skip = (page * limit) - limit;
+        return this.doctorAppModel.find({}, {},{
+            skip, limit
+        }).populate(["documents"]);
+    }
+
     create(userId: string, appDto: CreateDoctorApplicationDto){
         return this.doctorAppModel.findOneAndUpdate({ userId }, { $set: {
             userId, specialtyId: appDto.specialtyId, status: ApplicationStatus.Waiting
@@ -44,5 +51,11 @@ export class DoctorApplicationService {
 
     addDegree(identifiers: DoctorAppIdentifiers, degree: string){
         return this.doctorAppModel.findOneAndUpdate(identifiers, {$set: {degree}}, {new: true});
+    }
+
+    search(key: string){
+        return this.doctorAppModel.find({$or: [
+            {specialtyId: key}, {userId: key}
+        ]})
     }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, MaxFileSizeValidator, NotFoundException, Param, ParseFilePipe, Patch, Post, Res, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from "@nestjs/common";
 import { DocumentService } from "./document.service";
 import { CreateDocumentDto } from "./dto/create-document.dto";
 import { UpdateDocumentDto } from "./dto/update-document.dto";
@@ -15,7 +15,7 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { DOCUMENT_FILES_PATH } from "src/common/paths";
 import { randomUUID } from "crypto";
-import { unlinkSync } from "fs";
+import { createReadStream, unlinkSync } from "fs";
 import { join } from "path";
 import { DocumentFileValidator } from "src/common/file-validators/document-files.validator";
 import { log } from "console";
@@ -71,8 +71,19 @@ export class DocumentController {
     @ApiBearerAuth("JWT-Admin-Auth") @ApiBearerAuth("JWT-Doctor-Auth")
     @ApiBearerAuth("JWT-Patient-Auth") @ApiBearerAuth("JWT-User-Auth")
     @ApiParam({name: "documentId", example: "677c58c8317e261efb814e6b"})
-    deleteDocument(@Param("documentId", ParseMongoIdPipe) documentId: string){
-        return this.documentService.delete(documentId);
+    async deleteDocument(@Param("documentId", ParseMongoIdPipe) documentId: string){
+        const document = await this.documentService.delete(documentId) as Document;
+        if(document.files.length > 0){
+            document.files.forEach(file => {
+                try{
+                    const path = join(DOCUMENT_FILES_PATH, file);
+                    unlinkSync(path);
+                }catch(err){
+                    throw new HttpException("INTERNAL_SERVER_ERROR", 500);
+                }
+            })
+        }
+        return document;
     }
 
     @Post("upload-files/:documentId")
@@ -110,5 +121,16 @@ export class DocumentController {
                 return file.filename
             })
         })
+    }
+
+    @Get('get-file/:filename')
+    async getDocumentFile(@Param('filename') filename: string, @Res() res: any){
+        const path = join(DOCUMENT_FILES_PATH, filename);
+        try{
+            const fileStream = createReadStream(path);
+            fileStream.pipe(res);
+        }catch(err){
+            throw new NotFoundException();
+        }
     }
 }

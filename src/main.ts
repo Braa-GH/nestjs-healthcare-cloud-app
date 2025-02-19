@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { EmailService } from "./email/email.service";
+import { SeedService } from "./seed/seed.service";
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         cors: {
@@ -10,7 +11,7 @@ async function bootstrap() {
         },
     });
 
-    app.setGlobalPrefix("/api",{exclude:["/profile", "/cookies"]})
+    app.setGlobalPrefix("/api",{exclude:["/", "/profile"]})
 
     const PORT = await app.get(ConfigService).get("port");
     // Swagger documentation
@@ -23,7 +24,7 @@ async function bootstrap() {
             - Doctor: All Doctors registered to the system can process the endpoint.
             - Patient: All Patients registered to the system can process the endpoint.
             - Owner: Owner of the schema can process the endpoint.
-        `)
+    `)
     .setBasePath(`http://localhost:${PORT}/api`)
     .setVersion("1.0")
     .addBearerAuth({
@@ -41,7 +42,13 @@ async function bootstrap() {
     .build();
 
     const document = SwaggerModule.createDocument(app, documentConfig);
-    SwaggerModule.setup("/api/documentation", app, document);
+    SwaggerModule.setup("/api/documentation", app, document, {
+        jsonDocumentUrl: "swagger/json"
+    });
+
+    //seed Root Admin
+    const seedService = app.get(SeedService);
+    await seedService.seedRootAdmin();
     
     await app.listen(PORT, () => {
         console.log(`Server is listening on PORT ${PORT}`);

@@ -11,8 +11,17 @@ export class PatientApplicationService {
 
     constructor(@InjectModel(PatientApplication.name) private patientAppModel: Model<PatientApplication>){}
 
-    findOne(identifiers: PatientAppIdentifiers){
-        return this.patientAppModel.findOne(identifiers).populate(["documents"]);
+    findOne({_id, userId}: PatientAppIdentifiers){
+        return this.patientAppModel.findOne({$or: [
+            {_id}, {userId}
+        ]}).populate(["documents"]);
+    }
+
+    findAll(limit = 100, page = 1){
+        const skip = (page * limit) - limit;
+        return this.patientAppModel.find({}, {},{
+            skip, limit
+        }).populate(["documents"]);
     }
 
     create(userId: string){

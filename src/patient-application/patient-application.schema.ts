@@ -15,7 +15,7 @@ export class PatientApplication {
     documents: Document[];
 
     @Prop({default: ApplicationStatus.Waiting})
-    status: boolean;
+    status: string;
 
 }
 export const PatientApplicationSchema = SchemaFactory.createForClass(PatientApplication);

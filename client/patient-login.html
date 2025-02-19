@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <title>Healthcare - Login</title>
+</head>
+<body style="background-color: #eef; height: 96vh;">
+        <div class="container h-100 mt-3 d-flex justify-content-center align-items-center">
+            <div class="card p-3">
+                <div class="my-3">
+                    <h3>Login as Patient</h3>
+                </div>
+                <div class="">
+                    <label class="form-label" for="patient-id">Patient ID</label>
+                    <input class="form-control" type="text" name="patient-id" id="patient-id" required value="pt-012025-2d96fd">
+                </div>
+                <div class="">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" type="password" name="password" id="password" required value="liLi2024#">
+                </div>
+                <div class="text-center py-3">
+                    <button class="btn btn-primary w-100" id="submit-btn">login</button>
+                </div>
+                <div class="text-center">
+                    login in other roles <br>
+                    <a href="login.html">login as a basic user</a> <br>
+                    <a href="doctor-login.html">login as a Doctor</a>
+                </div>
+
+            </div>
+        </div>  
+    <script>
+        const smtBtn = document.querySelector("#submit-btn");
+        const patientId = document.querySelector("#patient-id");
+        const password = document.querySelector("#password");
+        
+        smtBtn.onclick = async function(){
+            const data = {
+                patientId: patientId.value,
+                password: password.value 
+            };
+            const response = await login(data);
+            const body = await response.json();
+            switch(response.status){
+                case 200:
+                case 201:
+                    localStorage.setItem("patient-token", `Bearer ${body.token}`)
+                    window.location.assign("/patient-dashboard.html");
+                    break;
+                default:
+                    window.alert(body.message)
+            }
+        }
+    </script>
+    <script>
+        function login(data){
+            console.log(data);
+            
+            return fetch("http://localhost:4000/api/auth/patient-login", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            })
+        }
+    </script>
+</body>
+</html>

@@ -42,17 +42,17 @@ export class AppointmentController {
         if(!patient || !doctor){
             throw new BadRequestException("Patient or Doctor is not exist!")
         }
-        const endTime = this.dateService.getEndTime(parseJSON(startTime), periodInMinutes);
+        const endTime = this.dateService.getEndTime(parseJSON(new Date(startTime) as any), periodInMinutes);
         
         const appointments = await this.appointmentService.findAll({doctorId, patientId});
         const newInterval: Interval = {
-            start: parseJSON(appointmentDto.startTime),
+            start: parseJSON(new Date(appointmentDto.startTime) as any),
             end: endTime
         }
 
         const isOverlaps = appointments.find(appointment => {
             const oldInterval: Interval = {
-                start: parseJSON(appointment.startTime as any),
+                start: parseJSON(new Date(appointment.startTime) as any),
                 end: appointment.endTime
             }
             return this.dateService.isPeriodsOverlapping(oldInterval, newInterval);
@@ -86,10 +86,8 @@ export class AppointmentController {
         const isOverlaps = appointments.find(appointment => {
             const oldInterval: Interval = {
                 start: parseJSON(appointment.startTime as any),
-                end: parseJSON(appointment.endTime as any)
+                end: parseJSON(appointment.endTime)
             }
-            console.log(oldInterval);
-            
             return this.dateService.isPeriodsOverlapping(oldInterval, newInterval);
         })
         if(isOverlaps)
